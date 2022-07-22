@@ -12,9 +12,9 @@ Next, clone the project with git by running `git clone https://github.com/kronif
 
 ### Committing and Pushing Code to a New Branch
 
-Once you've installed the project, you can activate the virtual environment by running `poetry shell`. You'll be put into a new shell with a new python interpreter which only has the dependencies listed in pyproject.toml installed. 
+Once you've installed the project, you can activate the virtual environment by running `poetry shell`. You'll be put into a new shell with a new python interpreter which only has the dependencies listed in pyproject.toml installed.
 
-In this shell you've opened, you need to do a few things before you start coding. First, pull the latest changes from Github by using `git pull`, and then create a new branch using `git branch {name}` or `git checkout -b {name}`. The latter will let you skip a step by automatically switching to the branch. If you went with the first command, use `git checkout {name}` to switch to the  new branch. Now, you can start coding whatever you've been assigned.
+In this shell you've opened, you need to do a few things before you start coding. First, pull the latest changes from Github by using `git pull`, and then create a new branch using `git branch {name}` or `git checkout -b {name}`. The latter will let you skip a step by automatically switching to the branch. If you went with the first command, use `git checkout {name}` to switch to the new branch. Now, you can start coding whatever you've been assigned.
 
 Before you commit what you've coded, there are a few things you need to do. First, format your code with `poetry run task format`. After that, you'll need to sort your imports using `poetry run task sort`. After that, your code should be ready to commit and push. Did your commit fail? Run `poetry run flake8 .` to check for any formatting problems in your code. The commands you have run above should format almost everything for you, but there are some things that tools cannot fix for you that you have to fix yourself. Fix any errors that flake8 gives you and try again. If that fails, rinse and repeat until your code passes.
 
