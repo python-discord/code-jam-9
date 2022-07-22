@@ -1,22 +1,23 @@
 [tool.poetry]
-name = "Name"
+name = "Code Jam 9"
 version = "0.1.0"
-description = ""
-authors = ["Author 1 <email@mail.com>"]
+description = "Our submission for Code Jam 9."
+authors = ["Dynamic Dryads"]
 license = "MIT"
 
 [tool.poetry.dependencies]
 python = "3.10.*"
 
-[tool.poetry.dev-dependencies]
-# Base tools
+[tool.poetry.group.dev.dependencies]
+taskipy = "^1.10.2"
+black = "^22.6.0"
 flake8 = "~4.0.1"
 isort = "~5.10.1"
 pre-commit = "~2.17.0"
-
-# Flake8 plugins, see https://github.com/python-discord/code-jam-template/tree/main#plugin-list
 flake8-docstrings = "~1.6.0"
 
+[tool.taskipy.tasks]
+format = "black ."
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
