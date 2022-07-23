@@ -14,18 +14,31 @@ PADDLE_LENGTH = 100
 PADDLE_WIDTH = 10
 
 
+class Player:
+    def __init__(self, client_id, player_number, connection):
+        self.client_id = client_id
+        self.connection = connection
+        self.player_number = player_number
+        self.score = 0
+        self.paddle_position = (0, 0)
+
+    def to_json(self):
+        data = {self.player_number: {
+            "position": self.paddle_position,
+            "score": self.score
+        }}
+        return json.dumps(data)
+
+
 class Server:
     """The pong game server."""
 
     def __init__(self):
         """Initialize the player and ball data."""
-        self.num_clients = 0
-        self.client_connections = {}  # Associates a websocket ID with its connection
         self.last_paddle_bounced = None  # The paddle that the ball last bounced off of
         # Values stored according to player order
-        self.client_nums = []
-        self.client_scores = []
-        self.client_positions = []
+        self.active_clients = {}
+
         # Ball variables
         self.ball_position = (0, 0)
         self.ball_speed = (1, 1)
@@ -33,32 +46,24 @@ class Server:
 
     async def handler(self, websocket):
         """Handle websocket connections."""
-        if self.num_clients >= MAX_PLAYERS:
+        if len(self.active_clients) >= MAX_PLAYERS:
             await websocket.close(reason='Only four players at once!')
 
-        client_id = str(websocket.id)
-        client_num = self.num_clients
-
-        # Register the client number
-        self.client_nums[client_num] = client_id
-        self.num_clients += 1
-
-        self.client_connections[client_id] = websocket  # Store the connection
-        # Respond to websocket messages
+        player = Player(websocket.id, len(self.active_clients), websocket)
+        self.active_clients[player.client_id] = player
         async for message in websocket:
             event = json.loads(message)
 
-            print(websocket.id, event)  # DEBUG
+            # print(websocket.id, event)  # DEBUG
 
             if event['type'] == 'init':
-                await websocket.send(json.dumps({'paddle_num': client_num}))
+                await websocket.send(json.dumps({'paddle_num': player.player_number}))
             elif event['type'] == 'paddle':
                 # Paddle position update
-                self.paddle_update_handler(client_id, event['data'])
+                self.paddle_update_handler(player, event['data'])
+                # await player.connection.send(json.dumps(player.paddle_position))
         # Clean up the connection
-        self.client_nums[client_num] = None  # Clear client num
-        self.client_scores[client_num] = 0
-        del self.client_connections[client_id]
+        del self.active_clients[websocket.id] # Clear client num
 
     async def main(self):
         """Process a game loop tick."""
@@ -133,9 +138,10 @@ class Server:
         # Update the ball position
         self.ball_position = (ball_x + self.ball_speed[0], self.ball_position[1] + self.ball_speed[1])
 
-    async def paddle_update_handler(self, paddle_num, new_location):
+
+    def paddle_update_handler(self, player, new_location):
         """Update the specified paddle location."""
-        self.client_positions[paddle_num] = new_location
+        player.paddle_position = new_location
 
     def check_ball_collision(self):
         """
@@ -178,7 +184,7 @@ class Server:
                 'bounce': self.ball_bounced,
             }
         }
-        websockets.broadcast(self.client_connections.values(), json.dumps(broadcast_info))
+        websockets.broadcast(self.active_clients.values(), json.dumps(broadcast_info))
 
 
 if __name__ == '__main__':
