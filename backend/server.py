@@ -64,9 +64,16 @@ class Server:
             async for message in websocket:
                 event = json.loads(message)
                 if event['type'] == 'init':
+                    data = {
+                        'type': 'join',
+                        'data': {
+                            'new': player.player_number,
+                            'ingame': list(self.active_clients.keys())
+                        }
+                    }
                     websockets.broadcast(
                         self.client_websockets,
-                        json.dumps({'type': 'join', 'data': player.player_number})
+                        json.dumps(data)
                     )
                 elif event['type'] == 'paddle':
                     # Paddle position update

@@ -76,19 +76,23 @@ class Client:
         self.player_number = None
 
     async def main(self):
+        paddles = {}
         self.websocket = await websockets.connect('ws://localhost:8765')
         await self.websocket.send(json.dumps({'type': 'init'}))
         player_number = None
         while player_number is None:
             message = json.loads(await self.websocket.recv())
             if message['type'] == 'join':
-                player_number = message['data']
+                player_number = message['data']['new']
+                for number in message['data']['ingame']:
+                    paddles[number] = Paddle(number=number, local=False)
         pygame.init()
         screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
         ball = Ball()
         ball_group = pygame.sprite.GroupSingle(ball)
         local_paddle = Paddle(number=player_number)
-        paddle_group = pygame.sprite.Group(local_paddle)
+        paddles[player_number] = local_paddle
+        paddle_group = pygame.sprite.Group(*paddles.values())
         clock = pygame.time.Clock()
 
         try:
@@ -96,10 +100,11 @@ class Client:
                 await self.websocket.send(json.dumps({'type': 'paddle', 'data': local_paddle.rect.center}))
                 message = json.loads(await self.websocket.recv())
                 if message['type'] == 'join':
-                    paddle_group.add(Paddle(number=message['data'], local=False))
+                    new_paddle = Paddle(number=message['data']['new'], local=False)
+                    paddle_group.add(new_paddle)
+                    paddles[message['data']['new']] = new_paddle
                 elif message['type'] == 'leave':
-                    p = [p for p in paddle_group if p.number == message['data']][0]
-                    paddle_group.remove(p)
+                    paddle_group.remove(paddles[message['data']])
                 elif message['type'] == 'updates':
                     updates = message['data']
                     # Convert keys back to ints because yes
