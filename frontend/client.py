@@ -2,6 +2,7 @@ import asyncio
 import json
 import os
 import sys
+import threading
 
 # Disable stdout while importing Pygame to suppress hello message
 s = sys.stdout
@@ -50,17 +51,20 @@ class Paddle(pygame.sprite.Sprite):  # Read pygame documentation on sprites and 
 
     def update(self, players):
         if self.local:
-            mousepos = pygame.mouse.get_pos()[self.direction]  # Mouse y value
+            mouse_pos = pygame.mouse.get_pos()[self.direction]  # Mouse y value
             if self.direction == 0:
-                self.rect.centerx = clamp(mousepos, self.rect.width / 2, SCREEN_WIDTH - self.rect.width / 2)
+                self.rect.centerx = clamp(mouse_pos, self.rect.width / 2, SCREEN_WIDTH - self.rect.width / 2)
             else:
-                self.rect.centery = clamp(mousepos, self.rect.height / 2, SCREEN_HEIGHT - self.rect.height / 2)
+                self.rect.centery = clamp(mouse_pos, self.rect.height / 2, SCREEN_HEIGHT - self.rect.height / 2)
         else:
-            self.rect.center = players[self.number]['position']
+            try:
+                self.rect.center = players[self.number]['position']
+            except KeyError:  # Hack because dict does not get populated fast enough
+                pass
 
 
 class Ball(pygame.sprite.Sprite):
-    def __init__(self, speed=10, size=(10, 10)):
+    def __init__(self, size=(10, 10)):
         super().__init__()
         self.image = pygame.Surface(size)
         self.image.fill((255, 255, 255))
@@ -72,60 +76,68 @@ class Ball(pygame.sprite.Sprite):
 
 class Client:
     def __init__(self):
-        self.websocket = None
         self.player_number = None
+        self.updates = None
+        self.paddles: dict[int, Paddle] = {}
+        self.start_event = threading.Event()
+        self.stop_event = threading.Event()
+        self.paddle_group = pygame.sprite.Group()
+
+    async def network_loop(self):
+        try:
+            async with websockets.connect('ws://localhost:8765') as websocket:
+                await websocket.send(json.dumps({'type': 'init'}))
+                while self.player_number is None:
+                    message = json.loads(await websocket.recv())
+                    if message['type'] == 'join':
+                        self.player_number = message['data']['new']
+                        for number in message['data']['ingame']:
+                            self.paddles[number] = Paddle(number=number, local=False)
+                self.start_event.set()
+                while True:
+                    data = {'type': 'paddle', 'data': self.paddles[self.player_number].rect.center}
+                    await websocket.send(json.dumps(data))
+                    message = json.loads(await websocket.recv())
+                    if message['type'] == 'join':
+                        self.paddles[message['data']['new']] = Paddle(number=message['data']['new'], local=False)
+                        self.paddle_group.add(self.paddles[message['data']['new']])
+                    elif message['type'] == 'leave':
+                        self.paddle_group.remove(self.paddles[message['data']])
+                    elif message['type'] == 'updates':
+                        updates = message['data']
+                        # Convert keys back to ints because yes
+                        updates['players'] = {int(k): v for k, v in updates['players'].items()}
+                        self.updates = updates
+        except websockets.ConnectionClosed:
+            self.stop_event.set()
 
     async def main(self):
-        paddles = {}
-        self.websocket = await websockets.connect('ws://localhost:8765')
-        await self.websocket.send(json.dumps({'type': 'init'}))
-        player_number = None
-        while player_number is None:
-            message = json.loads(await self.websocket.recv())
-            if message['type'] == 'join':
-                player_number = message['data']['new']
-                for number in message['data']['ingame']:
-                    paddles[number] = Paddle(number=number, local=False)
+        self.network_thread = threading.Thread(target=lambda: asyncio.run(self.network_loop()), daemon=True)
+        self.network_thread.start()
+        self.start_event.wait()
         pygame.init()
         screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
         ball = Ball()
         ball_group = pygame.sprite.GroupSingle(ball)
-        local_paddle = Paddle(number=player_number)
-        paddles[player_number] = local_paddle
-        paddle_group = pygame.sprite.Group(*paddles.values())
+        local_paddle = Paddle(number=self.player_number)
+        self.paddles[self.player_number] = local_paddle
+        self.paddle_group.add(self.paddles.values())
         clock = pygame.time.Clock()
-
-        try:
-            while True:
-                await self.websocket.send(json.dumps({'type': 'paddle', 'data': local_paddle.rect.center}))
-                message = json.loads(await self.websocket.recv())
-                if message['type'] == 'join':
-                    new_paddle = Paddle(number=message['data']['new'], local=False)
-                    paddle_group.add(new_paddle)
-                    paddles[message['data']['new']] = new_paddle
-                elif message['type'] == 'leave':
-                    paddle_group.remove(paddles[message['data']])
-                elif message['type'] == 'updates':
-                    updates = message['data']
-                    # Convert keys back to ints because yes
-                    updates['players'] = {int(k): v for k, v in updates['players'].items()}
-                    events = pygame.event.get()
-                    for event in events:
-                        if event.type == QUIT:
-                            pygame.quit()
-                            raise SystemExit
-                    pygame.event.pump()
-
-                    ball_group.update(updates['ball'])
-                    paddle_group.update(updates['players'])
-
-                screen.fill((0, 0, 0))
-                ball_group.draw(screen)
-                paddle_group.draw(screen)
-                pygame.display.flip()  # Updates the display
-                clock.tick(FPS)
-        finally:
-            await self.websocket.close()
+        while True:
+            if self.stop_event.is_set():
+                raise SystemExit
+            events = pygame.event.get()
+            for event in events:
+                if event.type == QUIT:
+                    raise SystemExit
+            pygame.event.pump()
+            ball_group.update(self.updates['ball'])
+            self.paddle_group.update(self.updates['players'])
+            screen.fill((0, 0, 0))
+            ball_group.draw(screen)
+            self.paddle_group.draw(screen)
+            pygame.display.flip()  # Updates the display
+            clock.tick(FPS)
 
 
 if __name__ == '__main__':
