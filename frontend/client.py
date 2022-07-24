@@ -9,6 +9,7 @@ import threading
 s = sys.stdout
 sys.stdout = open(os.devnull, 'w')
 import pygame  # noqa: E402
+import pygame_menu
 
 sys.stdout = s
 
@@ -121,12 +122,7 @@ class Client:
         except websockets.ConnectionClosed:
             self.stop_event.set()
 
-    async def main(self):
-        self.network_thread = threading.Thread(target=lambda: asyncio.run(self.network_loop()), daemon=True)
-        self.network_thread.start()
-        self.start_event.wait()
-        pygame.init()
-        screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
+    def start_game(self, screen):
         ball = Ball()
         ball_group = pygame.sprite.GroupSingle(ball)
         local_paddle = Paddle(number=self.player_number)
@@ -154,6 +150,23 @@ class Client:
                 self.average_mps = self.mps if self.average_mps == 0 else int(sum([self.mps, self.average_mps])/2)
                 self.mps = 0
                 counter = 0
+
+    def menu(self, screen):
+        menu = pygame_menu.Menu('Welcome', 400, 300,
+                       theme=pygame_menu.themes.THEME_BLUE)
+
+        client_name = menu.add.text_input('Name :', default='John Doe')
+        menu.add.button('Play', self.start_game, screen)
+        menu.add.button('Quit', pygame_menu.events.EXIT)
+        menu.mainloop(screen)
+
+    async def main(self):
+        self.network_thread = threading.Thread(target=lambda: asyncio.run(self.network_loop()), daemon=True)
+        self.network_thread.start()
+        self.start_event.wait()
+        pygame.init()
+        screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
+        self.menu(screen)
 
 
 if __name__ == '__main__':
