@@ -1,16 +1,15 @@
 FROM python:latest
 
-MAINTAINER zesty zombies
+LABEL maintainer="zesty zombies"
 
-RUN apt-get update -y && apt-get install -y python3-pip python-dev
-
-COPY /requirements.txt /app/requirements.txt
-
+# Set the working directory
 WORKDIR /app
-RUN python --version
-RUN pip3 install -r /app/requirements.txt
-run pip3 list
-COPY / /app
 
-CMD [ "python3", "./backend/server.py"]
+# Install project requirements
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy project to working directory
+COPY . .
+
+CMD ["python", "./backend/server.py"]
