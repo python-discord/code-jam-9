@@ -23,11 +23,11 @@ class Player:
         self.paddle_position = (0, 0)
 
     def to_json(self):
-        data = {self.player_number: {
+        return {
+            "player_number": self.player_number,
             "position": self.paddle_position,
             "score": self.score
-        }}
-        return json.dumps(data)
+        }
 
 
 class Server:
@@ -61,15 +61,18 @@ class Server:
                 "paddle_num": len(self.active_clients) - 1
             }
         }))
-        async for message in websocket:
-            event = json.loads(message)
+        try:
+            async for message in websocket:
+                event = json.loads(message)
 
-            # print(websocket.id, event)  # DEBUG
+                # print(websocket.id, event)  # DEBUG
 
-            if event["type"] == "paddle":
-                # Paddle position update
-                self.paddle_update_handler(player, event["data"])
-                # await player.connection.send(json.dumps(player.paddle_position))
+                if event["type"] == "paddle":
+                    # Paddle position update
+                    self.paddle_update_handler(player, event["data"])
+                    # await player.connection.send(json.dumps(player.paddle_position))
+        except websockets.ConnectionClosedError:
+            pass
         # Clean up the connection
         del self.active_clients[websocket.id] # Clear client num
 
@@ -77,7 +80,7 @@ class Server:
         """Process a game loop tick."""
         async with websockets.serve(self.handler, "localhost", 8765):
             while True:
-                await asyncio.sleep(1 / 60)
+                await asyncio.sleep(1 / 20)
                 await self.game_update()
                 await self.broadcast_updates()
 
@@ -151,6 +154,10 @@ class Server:
         """Update the specified paddle location."""
         player.paddle_position = new_location
 
+    async def unkown_message_handler(self):
+        """Unkown message handler"""
+        pass
+
     def check_ball_collision(self):
         """
         Check if the ball collided with a paddle.
@@ -192,7 +199,7 @@ class Server:
                 "bounce": self.ball_bounced,
             }
         }
-        websockets.broadcast([player.connection for player in self.active_clients.values()], json.dumps(broadcast_info))
+        (websockets.broadcast([player.connection for player in self.active_clients.values()], json.dumps(broadcast_info)))
 
     def client_from_side(self, side):
         """Get the client that is on the specified side"""
