@@ -1,4 +1,5 @@
 import asyncio
+from itertools import count
 import json
 import os
 import sys
@@ -25,6 +26,8 @@ ANGLE_MULTIPLIER = 75
 def clamp(value, min_value, max_value):
     return min(max(value, min_value), max_value)
 
+def lerp(value, new_value, multiplier):
+  return value + (multiplier * (new_value - value))
 
 class Paddle(pygame.sprite.Sprite):  # Read pygame documentation on sprites and groups
     def __init__(self, direction=1, size=(PADDLE_WIDTH, PADDLE_HEIGHT), number=0, local=True):
@@ -70,8 +73,12 @@ class Ball(pygame.sprite.Sprite):
         self.image.fill((255, 255, 255))
         self.rect = self.image.get_rect()
 
-    def update(self, position):
-        self.rect.center = position
+    def update(self, position, mps):
+        if mps == 0:
+            self.rect.center = position
+        else:
+            self.rect.center = (lerp(self.rect.centerx, position[0], FPS/mps), 
+                lerp(self.rect.centery, position[1], FPS/mps))
 
 
 class Client:
@@ -82,6 +89,8 @@ class Client:
         self.start_event = threading.Event()
         self.stop_event = threading.Event()
         self.paddle_group = pygame.sprite.Group()
+        self.mps = 0  # Messages per second
+        self.average_mps = 0
 
     async def network_loop(self):
         try:
@@ -98,6 +107,7 @@ class Client:
                     data = {'type': 'paddle', 'data': self.paddles[self.player_number].rect.center}
                     await websocket.send(json.dumps(data))
                     message = json.loads(await websocket.recv())
+                    self.mps += 1
                     if message['type'] == 'join':
                         self.paddles[message['data']['new']] = Paddle(number=message['data']['new'], local=False)
                         self.paddle_group.add(self.paddles[message['data']['new']])
@@ -123,6 +133,7 @@ class Client:
         self.paddles[self.player_number] = local_paddle
         self.paddle_group.add(self.paddles.values())
         clock = pygame.time.Clock()
+        counter = 0
         while True:
             if self.stop_event.is_set():
                 raise SystemExit
@@ -131,13 +142,18 @@ class Client:
                 if event.type == QUIT:
                     raise SystemExit
             pygame.event.pump()
-            ball_group.update(self.updates['ball'])
+            ball_group.update(self.updates['ball'], self.average_mps)
             self.paddle_group.update(self.updates['players'])
             screen.fill((0, 0, 0))
             ball_group.draw(screen)
             self.paddle_group.draw(screen)
             pygame.display.flip()  # Updates the display
             clock.tick(FPS)
+            counter += 1
+            if counter == FPS:
+                self.average_mps = self.mps if self.average_mps == 0 else int(sum([self.mps, self.average_mps])/2)
+                self.mps = 0
+                counter = 0
 
 
 if __name__ == '__main__':
