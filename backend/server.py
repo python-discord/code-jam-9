@@ -44,7 +44,7 @@ class Server:
 
     async def main(self):
         """Process a game loop tick."""
-        async with websockets.serve(self.handler, 'localhost', 8765):
+        async with websockets.serve(self.handler, '0.0.0.0', 8765):
             while True:
                 await self.game_update()
                 await self.broadcast_updates()
