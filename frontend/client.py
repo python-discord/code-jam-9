@@ -1,17 +1,12 @@
 import asyncio
 import json
 import os
-import sys
 import threading
 
-# Disable stdout while importing Pygame to suppress hello message
-s = sys.stdout
-sys.stdout = open(os.devnull, 'w')
+# Suppress pygame's hello message
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 import pygame  # noqa: E402
 import pygame_menu  # noqa: E402
-
-sys.stdout = s
-
 import websockets  # noqa: E402
 from pygame.locals import QUIT  # noqa: E402
 
