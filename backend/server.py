@@ -7,7 +7,10 @@ import websockets
 
 
 class Player:
+    """Player data."""
+
     def __init__(self, id: str, player_number: int, websocket):
+        """Initialize the player data."""
         self.id = str(id)
         self.websocket = websocket
         self.player_number = player_number
@@ -15,6 +18,11 @@ class Player:
         self.paddle_position = (0, 0)
 
     def to_dict(self):
+        """Return a dict with the player data.
+
+        Returns:
+            dict: The player data.
+        """
         data = {
             'position': self.paddle_position,
             'score': self.score,

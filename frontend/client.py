@@ -1,3 +1,4 @@
+"""The client code."""
 import asyncio
 import json
 import os
@@ -19,15 +20,27 @@ ANGLE_MULTIPLIER = 75
 
 
 def clamp(value, min_value, max_value):
+    """Restrict the provided value to be between a minimum and maximum."""
     return min(max(value, min_value), max_value)
 
 
 def lerp(value, new_value, multiplier):
+    """Do linear interpolation on the provided value."""
     return value + (multiplier * (new_value - value))
 
 
 class Paddle(pygame.sprite.Sprite):  # Read pygame documentation on sprites and groups
+    """The paddle sprite."""
+
     def __init__(self, direction=1, size=(PADDLE_WIDTH, PADDLE_HEIGHT), number=0, local=True):
+        """Initialize a paddle sprite.
+
+        Args:
+            direction (int, optional): Determines whether the paddle is vertical or horizontal. Defaults to 1.
+            size (tuple, optional): The dimensions of the paddle sprite. Defaults to (PADDLE_WIDTH, PADDLE_HEIGHT).
+            number (int, optional): The paddle number. Defaults to 0.
+            local (bool, optional): Set to True if the paddle movement is controlled by the client. Defaults to True.
+        """
         super().__init__()
         self.direction = direction
         self.size = size
@@ -50,6 +63,11 @@ class Paddle(pygame.sprite.Sprite):  # Read pygame documentation on sprites and 
             self.rect.centery = SCREEN_HEIGHT - 30
 
     def update(self, players):
+        """Update the paddle location.
+
+        Args:
+            players (dict): A dict containing the players.
+        """
         if self.local:
             mouse_pos = pygame.mouse.get_pos()[self.direction]  # Mouse y value
             if self.direction == 0:
@@ -64,13 +82,25 @@ class Paddle(pygame.sprite.Sprite):  # Read pygame documentation on sprites and 
 
 
 class Ball(pygame.sprite.Sprite):
+    """The ball sprite."""
+
     def __init__(self, size=(10, 10)):
+        """Initialize a ball sprite.
+
+        Args:
+            size (tuple, optional): The dimensions of the ball sprite. Defaults to (10, 10).
+        """
         super().__init__()
         self.image = pygame.Surface(size)
         self.image.fill((255, 255, 255))
         self.rect = self.image.get_rect()
 
     def update(self, position, mps):
+        """Update the ball location.
+
+        Args:
+            position (tuple): The XY coordinates of the ball.
+        """
         self.rect.center = position
         # if mps == 0:
         #     self.rect.center = position
@@ -82,7 +112,10 @@ class Ball(pygame.sprite.Sprite):
 
 
 class Client:
+    """The pong game client."""
+
     def __init__(self):
+        """Initialize the client."""
         self.player_number = None
         self.updates = None
         self.paddles: dict[int, Paddle] = {}
@@ -93,6 +126,7 @@ class Client:
         self.average_mps = 0
 
     async def network_loop(self):
+        """Manage the game networking."""
         try:
             async with websockets.connect('ws://zesty-zombies.pshome.me:8765') as websocket:
                 await websocket.send(json.dumps({'type': 'init'}))
@@ -122,6 +156,11 @@ class Client:
             self.stop_event.set()
 
     def start_game(self, screen):
+        """Run the game.
+
+        Args:
+            screen (pygame.Surface): The game screen.
+        """
         ball = Ball()
         ball_group = pygame.sprite.GroupSingle(ball)
         local_paddle = Paddle(number=self.player_number)
@@ -146,11 +185,16 @@ class Client:
             clock.tick(FPS)
             counter += 1
             if counter == FPS:
-                self.average_mps = self.mps if self.average_mps == 0 else int(sum([self.mps, self.average_mps])/2)
+                self.average_mps = self.mps if self.average_mps == 0 else int(sum([self.mps, self.average_mps]) / 2)
                 self.mps = 0
                 counter = 0
 
     def menu(self, screen):
+        """Display the start menu.
+
+        Args:
+            screen (pygame.Surface): The game screen.
+        """
         menu = pygame_menu.Menu('Welcome', 400, 300, theme=pygame_menu.themes.THEME_BLUE)
 
         menu.add.text_input('Name :', default='John Doe')
@@ -159,6 +203,7 @@ class Client:
         menu.mainloop(screen)
 
     async def main(self):
+        """Start the game client."""
         self.network_thread = threading.Thread(target=lambda: asyncio.run(self.network_loop()), daemon=True)
         self.network_thread.start()
         self.start_event.wait()
