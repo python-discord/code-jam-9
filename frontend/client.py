@@ -1,5 +1,4 @@
 import asyncio
-from itertools import count
 import json
 import os
 import sys
@@ -9,7 +8,7 @@ import threading
 s = sys.stdout
 sys.stdout = open(os.devnull, 'w')
 import pygame  # noqa: E402
-import pygame_menu
+import pygame_menu  # noqa: E402
 
 sys.stdout = s
 
@@ -27,8 +26,10 @@ ANGLE_MULTIPLIER = 75
 def clamp(value, min_value, max_value):
     return min(max(value, min_value), max_value)
 
+
 def lerp(value, new_value, multiplier):
-  return value + (multiplier * (new_value - value))
+    return value + (multiplier * (new_value - value))
+
 
 class Paddle(pygame.sprite.Sprite):  # Read pygame documentation on sprites and groups
     def __init__(self, direction=1, size=(PADDLE_WIDTH, PADDLE_HEIGHT), number=0, local=True):
@@ -78,8 +79,10 @@ class Ball(pygame.sprite.Sprite):
         if mps == 0:
             self.rect.center = position
         else:
-            self.rect.center = (lerp(self.rect.centerx, position[0], FPS/mps), 
-                lerp(self.rect.centery, position[1], FPS/mps))
+            self.rect.center = (
+                lerp(self.rect.centerx, position[0], FPS / mps),
+                lerp(self.rect.centery, position[1], FPS / mps)
+            )
 
 
 class Client:
@@ -152,10 +155,9 @@ class Client:
                 counter = 0
 
     def menu(self, screen):
-        menu = pygame_menu.Menu('Welcome', 400, 300,
-                       theme=pygame_menu.themes.THEME_BLUE)
+        menu = pygame_menu.Menu('Welcome', 400, 300, theme=pygame_menu.themes.THEME_BLUE)
 
-        client_name = menu.add.text_input('Name :', default='John Doe')
+        menu.add.text_input('Name :', default='John Doe')
         menu.add.button('Play', self.start_game, screen)
         menu.add.button('Quit', pygame_menu.events.EXIT)
         menu.mainloop(screen)
