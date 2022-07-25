@@ -15,8 +15,8 @@ sys.stdout = s
 import websockets  # noqa: E402
 from pygame.locals import QUIT  # noqa: E402
 
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
+SCREEN_WIDTH = 700
+SCREEN_HEIGHT = 700
 PADDLE_WIDTH = 10
 PADDLE_HEIGHT = 100
 FPS = 60

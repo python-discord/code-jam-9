@@ -33,7 +33,7 @@ class Server:
         self.client_websockets = []
         # Ball variables
         self.max_players = 4
-        self.screen_size = (800, 600)
+        self.screen_size = (700, 700)
         self.paddle_size = (10, 100)
         self.ball_size = (10, 10)
         self.ball_position_start: tuple[int, int] = (self.screen_size[0] // 2, self.screen_size[1] // 2)
