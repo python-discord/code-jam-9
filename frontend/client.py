@@ -76,13 +76,14 @@ class Ball(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
     def update(self, position, mps):
-        if mps == 0:
-            self.rect.center = position
-        else:
-            self.rect.center = (
-                lerp(self.rect.centerx, position[0], FPS / mps),
-                lerp(self.rect.centery, position[1], FPS / mps)
-            )
+        self.rect.center = position
+        # if mps == 0:
+        #     self.rect.center = position
+        # else:
+        #     self.rect.center = (
+        #         lerp(self.rect.centerx, position[0], FPS / mps),
+        #         lerp(self.rect.centery, position[1], FPS / mps)
+        #     )
 
 
 class Client:
