@@ -49,6 +49,7 @@ class Server:
         self.ball_speed_start: tuple[int, int] = (5, 5)
         self.ball_speed: tuple[int, int] = self.ball_speed_start
         self.ball_bounced: bool = False
+        self.ball_last_side_bounced_off_of = None
 
     async def main(self):
         """Process a game loop tick."""
@@ -106,30 +107,37 @@ class Server:
         ball_y = self.ball_position[1]
 
         # Check if ball collides with a wall
-        if ball_x <= 0:
+        if ball_x <= 0 and self.last_client_bounced != 0:
             if self.active_clients.get(0) is not None:
                 self.add_score()
                 self.reset_ball()
             else:
                 collided_side = 0
-        if ball_x >= self.screen_size[0]:
+                self.last_client_bounced = 0
+
+        if ball_x >= self.screen_size[0] and self.last_client_bounced != 1:
             if self.active_clients.get(1) is not None:
                 self.add_score()
                 self.reset_ball()
             else:
                 collided_side = 1
-        if ball_y <= 0:
+                self.last_client_bounced = 1
+
+        if ball_y <= 0 and self.last_client_bounced != 2:
             if self.active_clients.get(2) is not None:
                 self.add_score()
                 self.reset_ball()
             else:
                 collided_side = 2
-        if ball_y >= self.screen_size[1]:
+                self.last_client_bounced = 2
+
+        if ball_y >= self.screen_size[1] and self.last_client_bounced != 3:
             if self.active_clients.get(3) is not None:
                 self.add_score()
                 self.reset_ball()
             else:
                 collided_side = 3
+                self.last_client_bounced = 3
 
         # Check if ball collides with a paddle
         if collided_side is None:
@@ -151,9 +159,10 @@ class Server:
                 self.ball_speed = (self.ball_speed[0], -self.ball_speed[1])
             if collided_side == 3:
                 self.ball_speed = (self.ball_speed[0], -self.ball_speed[1])
+            print(self.ball_speed, self.ball_bounced, collided_side, self.ball_position)
+
         else:
             self.ball_bounced = False
-
         # Update the ball position
         self.ball_position = (
             self.ball_position[0] + self.ball_speed[0],
