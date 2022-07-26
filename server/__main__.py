@@ -35,6 +35,11 @@ async def request_user_limit(ws):
 async def connect(ws):
     """Websocket handler function to handle connections."""
     global LAST_USER
+    if len(CONNECTIONS) > 0:
+        if len(CONNECTIONS) + 1 > USER_LIMIT:
+            await ws.send('{"error": "user limit has been reached"}')
+            await ws.close()
+            return
     uname = await request_uname(ws)
     if len(CONNECTIONS) == 1:
         await request_user_limit(ws)
@@ -42,7 +47,10 @@ async def connect(ws):
         await ws.wait_closed()
     finally:
         LAST_USER = uname
-        del CONNECTIONS[uname]
+        try:
+            del CONNECTIONS[uname]
+        except KeyError:
+            pass
 
 
 async def send_user_count_event():
