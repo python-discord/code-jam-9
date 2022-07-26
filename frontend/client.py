@@ -128,7 +128,7 @@ class Client:
     async def network_loop(self):
         """Manage the game networking."""
         try:
-            async with websockets.connect('ws://zesty-zombies.pshome.me:8765') as websocket:
+            async with websockets.connect('ws://localhost:8765') as websocket:
                 await websocket.send(json.dumps({'type': 'init'}))
                 while self.player_number is None:
                     message = json.loads(await websocket.recv())
