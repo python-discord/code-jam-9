@@ -6,7 +6,7 @@ class Ball:
         self.paddle_size = (10, 100)
         self.ball_position_start: tuple[int, int] = self.randomize_ball_start_position()
         self.ball_position: tuple[int, int] = self.ball_position_start
-        self.ball_speed_start: tuple[int, int] = (5, 5)
+        self.ball_speed_start: tuple[int, int] = self.randomize_ball_start_angle()
         self.ball_speed: tuple[int, int] = self.ball_speed_start
         self.ball_bounced: bool = False
         self.ball_last_side_bounced_off_of = None
@@ -65,7 +65,7 @@ class Ball:
         if collided_side is not None:
             self.ball_bounced = True
 
-
+            print('old ball speed', self.ball_speed)
             # Calculate new ball speed
             if collided_side == 0:
                 self.ball_speed = (-self.ball_speed[0], self.ball_speed[1])
@@ -75,6 +75,8 @@ class Ball:
                 self.ball_speed = (self.ball_speed[0], -self.ball_speed[1])
             if collided_side == 3:
                 self.ball_speed = (self.ball_speed[0], -self.ball_speed[1])
+
+            print('new ball speed', self.ball_speed)
 
 
         else:
@@ -88,27 +90,35 @@ class Ball:
             # self.ball_speed = tuple([x+1 for x in list(self.ball_speed)])
             # print(self.ball_speed, type(self.ball_speed))
 
-    def collision_v2(self, collided_side: int, speed_adjustment: int):
+    def collision_v2(self, collided_side: int, angle_adjustment: int):
         if collided_side == 0:
-            self.ball_speed = (-self.ball_speed[0] - speed_adjustment, self.ball_speed[1] + speed_adjustment)
+            self.ball_speed = (-self.ball_speed[0] - angle_adjustment, self.ball_speed[1] + angle_adjustment)
         if collided_side == 1:
-            self.ball_speed = (-self.ball_speed[0] - speed_adjustment, self.ball_speed[1] + speed_adjustment)
+            self.ball_speed = (-self.ball_speed[0] - angle_adjustment, self.ball_speed[1] + angle_adjustment)
         if collided_side == 2:
-            self.ball_speed = (self.ball_speed[0] + speed_adjustment, -self.ball_speed[1] - speed_adjustment)
+            self.ball_speed = (self.ball_speed[0] + angle_adjustment, -self.ball_speed[1] - angle_adjustment)
         if collided_side == 3:
-            self.ball_speed = (self.ball_speed[0] + speed_adjustment, -self.ball_speed[1] - speed_adjustment)
-        if speed_adjustment >= 1:
-            self.paddle_bounce_counter = 0
+            self.ball_speed = (self.ball_speed[0] + angle_adjustment, -self.ball_speed[1] - angle_adjustment)
 
     def randomize_ball_start_position(self):
+        """picks a starting location in a rectangle whos border is 25% the width of the arena"""
         return (random.randint(self.server.screen_size[0] * 0.25, self.server.screen_size[0] * 0.75),
             random.randint(self.server.screen_size[1] * 0.25, self.server.screen_size[1] * 0.75))
 
+    def randomize_ball_start_angle(self):
+        """generates a random ball speed with angles between -7 - -3 and 3 - 7. The opposition value but be equal to
+        either the negative or the positive of 10 minutes the absolute value of the first
+        """
+        x = random.choice([-3, -4, -5, -6, -7, 3, 4, 5, 6, 7])
+        yy = 10 - abs(x)
+        y = random.choice([yy, -yy])
+        print(x, y)
+        return [x, y]
+
     def reset_ball(self):
         """Reset the ball position."""
-
-        self.ball_position = self.ball_position_start
-        self.ball_speed = self.ball_speed_start
+        self.ball_position = self.randomize_ball_start_position()
+        self.ball_speed = self.randomize_ball_start_angle()
 
 
     def check_ball_paddle_collision(self, paddle_pos, player_number):
