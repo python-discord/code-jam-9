@@ -15,6 +15,8 @@ SCREEN_WIDTH = 700
 SCREEN_HEIGHT = 700
 PADDLE_WIDTH = 10
 PADDLE_HEIGHT = 100
+BRICK_WIDTH = 10
+BRICK_HEIGHT = 100
 FPS = 60
 ANGLE_MULTIPLIER = 75
 
@@ -29,7 +31,7 @@ def lerp(value, new_value, multiplier):
     return value + (multiplier * (new_value - value))
 
 
-class Paddle(pygame.sprite.Sprite):  # Read pygame documentation on sprites and groups
+class Paddle(pygame.sprite.Sprite):
     """The paddle sprite."""
 
     def __init__(self, direction=1, size=(PADDLE_WIDTH, PADDLE_HEIGHT), number=0, local=True):
@@ -110,15 +112,19 @@ class Ball(pygame.sprite.Sprite):
         #         lerp(self.rect.centery, position[1], FPS / mps)
         #     )
 
-class Breakout(pygame.sprite.Sprite):
+class Brick(pygame.sprite.Sprite):
 
-    def __init__(self, size=(100, 100)):
-        """Initialize a breackout sprite."""
+    def __init__(self, size=(10, 50)):
+        """The Brick sprite."""
 
         super().__init__()
         self.image = pygame.Surface(size)
         self.image.fill((255, 255, 255))
         self.rect = self.image.get_rect()
+    
+    def update(self, message):
+
+        self.rect.center = message['position']
 
 
 class Client:
@@ -129,9 +135,9 @@ class Client:
         self.player_number = None
         self.updates = None
         self.paddles: dict[int, Paddle] = {}
+        self.bricks: list[Brick] = []
         self.start_event = threading.Event()
         self.stop_event = threading.Event()
-        self.paddle_group = pygame.sprite.Group()
         self.mps = 0  # Messages per second
         self.average_mps = 0
 
@@ -154,14 +160,17 @@ class Client:
                     self.mps += 1
                     if message['type'] == 'join':
                         self.paddles[message['data']['new']] = Paddle(number=message['data']['new'], local=False)
-                        self.paddle_group.add(self.paddles[message['data']['new']])
                     elif message['type'] == 'leave':
-                        self.paddle_group.remove(self.paddles[message['data']])
+                        del self.paddles[message['data']]
                     elif message['type'] == 'updates':
                         updates = message['data']
                         # Convert keys back to ints because yes
                         updates['players'] = {int(k): v for k, v in updates['players'].items()}
                         self.updates = updates
+                        if not len(updates['bricks']) == len(self.bricks):
+                            self.bricks = []
+                            for brick in updates['bricks']:
+                                self.bricks.append(Brick())
         except websockets.ConnectionClosed:
             self.stop_event.set()
 
@@ -172,13 +181,8 @@ class Client:
             screen (pygame.Surface): The game screen.
         """
         ball = Ball()
-        block = Breakout()
-        block_group = pygame.sprite.GroupSingle(ball)
-        block_group.draw(screen)
-        ball_group = pygame.sprite.GroupSingle(ball)
         local_paddle = Paddle(number=self.player_number)
         self.paddles[self.player_number] = local_paddle
-        self.paddle_group.add(self.paddles.values())
         clock = pygame.time.Clock()
         counter = 0
         while True:
@@ -188,12 +192,15 @@ class Client:
             for event in events:
                 if event.type == QUIT:
                     raise SystemExit
-            pygame.event.pump()
-            ball_group.update(self.updates['ball'], self.average_mps)
-            self.paddle_group.update(self.updates['players'])
             screen.fill((0, 0, 0))
-            ball_group.draw(screen)
-            self.paddle_group.draw(screen)
+            ball.update(self.updates['ball'], self.average_mps)
+            screen.blit(ball.image, ball.rect)
+            for paddle in self.paddles.values():
+                paddle.update(self.updates['players'])
+            screen.blits([(paddle.image, paddle.rect) for paddle in self.paddles.values()])
+            for index, brick in enumerate(self.bricks):
+                brick.update(self.updates['bricks'][index])
+            screen.blits([(brick.image, brick.rect) for brick in self.bricks])
             pygame.display.flip()  # Updates the display
             clock.tick(FPS)
             counter += 1
