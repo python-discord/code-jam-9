@@ -125,10 +125,9 @@ class Client:
         self.mps = 0  # Messages per second
         self.average_mps = 0
 
-    async def network_loop(self):
-        """Manage the game networking."""
+    async def network_loop(self, ip):
         try:
-            async with websockets.connect('ws://zesty-zombies.pshome.me:8765') as websocket:
+            async with websockets.connect('ws://'+ip+':8765') as websocket:
                 await websocket.send(json.dumps({'type': 'init'}))
                 while self.player_number is None:
                     message = json.loads(await websocket.recv())
@@ -189,24 +188,20 @@ class Client:
                 self.mps = 0
                 counter = 0
 
-    def menu(self, screen):
-        """Display the start menu.
-
-        Args:
-            screen (pygame.Surface): The game screen.
-        """
-        menu = pygame_menu.Menu('Welcome', 400, 300, theme=pygame_menu.themes.THEME_BLUE)
-
-        menu.add.text_input('Name :', default='John Doe')
-        menu.add.button('Play', self.start_game, screen)
-        menu.add.button('Quit', pygame_menu.events.EXIT)
-        menu.mainloop(screen)
-
-    async def main(self):
-        """Start the game client."""
-        self.network_thread = threading.Thread(target=lambda: asyncio.run(self.network_loop()), daemon=True)
+    def establish_connection(self, ip, screen):
+        self.network_thread = threading.Thread(target=lambda: asyncio.run(self.network_loop(ip)), daemon=True)
         self.network_thread.start()
         self.start_event.wait()
+        self.main_menu.add.button('Play', self.start_game, screen)
+        self.main_menu.add.button('Quit', pygame_menu.events.EXIT)
+
+    def menu(self, screen):
+        self.main_menu = pygame_menu.Menu('main menu', 400, 300, theme=pygame_menu.themes.THEME_BLUE)
+        ip = self.main_menu.add.text_input('Host Ip :', default='zesty-zombies.pshome.me')
+        self.main_menu.add.button('Connect', self.establish_connection, ip.get_value(), screen)
+        self.main_menu.mainloop(screen)
+
+    async def main(self):
         pygame.init()
         screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
         self.menu(screen)
