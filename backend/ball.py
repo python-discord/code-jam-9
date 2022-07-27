@@ -61,6 +61,11 @@ class Ball:
                     self.server.last_client_bounced = client
                     self.paddle_bounce_counter += 1
                     break
+            for brick in self.server.bricks:
+                if self.check_ball_paddle_collision(brick.position):
+                    self.sever.add_score(brick.points)
+                    collided_side = self.server.last_client_bounced
+
 
         # Ball collision logic
         if collided_side is not None:

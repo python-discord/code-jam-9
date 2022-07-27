@@ -2,6 +2,8 @@
 
 import asyncio
 import json
+import random
+
 from ball import Ball
 import websockets
 
@@ -34,9 +36,10 @@ class Player:
 
 
 class Brick:
-    def __init__(self, position_x, position_y):
-        self.size = (10, 50)
+    def __init__(self, position_x: int, position_y: int, size: tuple = (10, 50)):
+        self.size = size
         self.position = (position_x, position_y)
+        self.points = 1
 
 
 class Bricks:
@@ -136,10 +139,10 @@ class Server:
         if self.active_clients:
             await self.ball.update_ball_position()
 
-    def add_score(self):
+    def add_score(self, points: int = 1):
         """Update the score."""
         if self.last_client_bounced is not None:
-            self.last_client_bounced.score += 1
+            self.last_client_bounced.score += points
 
     async def broadcast_updates(self):
         """Broadcast updates to each connected client."""
