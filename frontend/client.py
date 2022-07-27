@@ -127,8 +127,6 @@ class Client:
             self.stop_event.set()
 
     def start_game(self, screen):
-        if not self.establish_connection:
-            pass
         ball = Ball()
         ball_group = pygame.sprite.GroupSingle(ball)
         local_paddle = Paddle(number=self.player_number)
