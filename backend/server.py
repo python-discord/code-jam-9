@@ -57,8 +57,13 @@ class Bricks:
         return brick_list
 
     def to_json(self):
-        data = [list(brick.position) for brick in self.brick_list]
+        data = {}
+        for position, brick in enumerate(self.brick_list):
+            data["brick_{}".format(position+1)] = {"position": brick.position}
         return data
+
+        # data = [list(brick.position) for brick self.brick_list]
+        # return data
 
 
 
@@ -148,6 +153,7 @@ class Server:
                 'bounce': self.ball.ball_bounced,
             }
         }
+
         websockets.broadcast(self.client_websockets, json.dumps(updates))
 
 
