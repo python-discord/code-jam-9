@@ -3,73 +3,72 @@ import json
 
 import websockets
 
-CONNECTIONS = {}
-USER_COUNT = len(CONNECTIONS)
-USER_LIMIT = int()
-LAST_USER = str()
+from .connections import Connections
+
+CONNECTIONS = Connections()
 
 
-async def request_uname(ws):
+async def request_uname(ws) -> str:
     """Requests a newly connected client's username."""
-    global USER_LIMIT
     await ws.send('{"event": "uname_request"}')
     uname = json.loads(await ws.recv())["uname"]
-    if uname in list(CONNECTIONS.keys()):
+    if uname in CONNECTIONS.data.keys():
         await ws.send('{"error": "username already used"}')
         await request_uname(ws)
-    CONNECTIONS[uname] = ws
+    CONNECTIONS.add_user(uname, ws)
     return uname
 
 
-async def request_user_limit(ws):
+async def request_user_limit(ws) -> None:
     """Requests the user limit for the game from the first user who connects."""
-    global USER_LIMIT
     await ws.send('{"event": "ulimit_request"}')
     ulimit = json.loads(await ws.recv())["ulimit"]
-    if ulimit < 2:
-        await ws.send('{"error": "ulimit must be larger than 1"}')
+    if ulimit < 2 or ulimit % 1 != 0:
+        await ws.send('{"error": "ulimit must be an integer greater than 1"}')
         await request_user_limit(ws)
-    USER_LIMIT = ulimit
+    CONNECTIONS.user_limit = ulimit
 
 
-async def connect(ws):
-    """Websocket handler function to handle connections."""
-    global LAST_USER
-    if len(CONNECTIONS) > 0:
-        if len(CONNECTIONS) + 1 > USER_LIMIT:
+async def connect(ws) -> None:
+    """
+    Websocket connection handler.
+
+    Prompts for a username after checking
+    if more users can join, then waits to remove the user when they user_leave
+    """
+    try:
+        if len(CONNECTIONS) >= CONNECTIONS.user_limit:
             await ws.send('{"error": "user limit has been reached"}')
             await ws.close()
             return
+    # user_limit has not been assigned a value yet
+    except TypeError:
+        pass
     uname = await request_uname(ws)
-    if len(CONNECTIONS) == 1:
+    # This property is initialized to None, so this reliably checks if it has to be requested
+    if CONNECTIONS.user_limit is None:
         await request_user_limit(ws)
     try:
         await ws.wait_closed()
     finally:
-        LAST_USER = uname
-        try:
-            del CONNECTIONS[uname]
-        except KeyError:
-            pass
+        CONNECTIONS.remove_user(uname)
 
 
-async def send_user_count_event():
+async def send_user_count_event() -> None:
     """Sends user count events to all websockets."""
-    global CONNECTIONS
-    global USER_COUNT
     while True:
-        if USER_COUNT < len(CONNECTIONS):
-            USER_COUNT = len(CONNECTIONS)
+        user_count = CONNECTIONS.user_count
+        if user_count != len(CONNECTIONS):
+            # There should be an extra user if one has joined, and a missing
+            # one if one has left
+            user_count = len(CONNECTIONS)
+            current_users = CONNECTIONS.current_users
+            event_type = "user_join" if user_count < len(CONNECTIONS) else "user_leave"
             websockets.broadcast(
-                CONNECTIONS.values(),
-                f'{{"event": "user_join", "count": {USER_COUNT}, "uname": "{list(CONNECTIONS.keys())[-1]}"}}',
+                CONNECTIONS.data.values(),
+                f'{{"event": "{event_type}", "count": {user_count}, "uname_list": {current_users}}}',
             )
-        elif USER_COUNT > len(CONNECTIONS):
-            USER_COUNT = len(CONNECTIONS)
-            websockets.broadcast(
-                CONNECTIONS.values(),
-                f'{{"event": "user_leave", "count": {USER_COUNT}, "uname": "{LAST_USER}"}}',
-            )
+            CONNECTIONS.update_user_count()
         await asyncio.sleep(1)
 
 
