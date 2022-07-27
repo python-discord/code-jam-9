@@ -33,6 +33,35 @@ class Player:
         return data
 
 
+class Brick:
+    def __init__(self, position_x, position_y):
+        self.size = (10, 50)
+        self.position = (position_x, position_y)
+
+
+class Bricks:
+    def __init__(self, screen_size, server_reference):
+        self.screen_size = screen_size
+        self.brick_list = self.generate_bricks()
+        self.server = server_reference
+
+    def generate_bricks(self):
+        brick_list = []
+        y_offset = 150
+        x_offset = 0
+        for r in range(1, 5):
+            brick = Brick(self.screen_size[0]//2, y_offset * r)
+            x_offset += 100
+            brick_list.append(brick)
+
+        return brick_list
+
+    def to_json(self):
+        data = [list(brick.position) for brick in self.brick_list]
+        return data
+
+
+
 class Server:
     """The pong game server."""
 
@@ -46,6 +75,7 @@ class Server:
         self.screen_size = (700, 700)
         self.paddle_size = (10, 100)
         self.ball = Ball(self.screen_size, self)
+        self.bricks = Bricks(self.screen_size, self)
 
 
     async def main(self):
@@ -113,6 +143,7 @@ class Server:
             'type': 'updates',
             'data': {
                 'players': players,
+                'bricks': self.bricks.to_json(),
                 'ball': self.ball.ball_position,
                 'bounce': self.ball.ball_bounced,
             }

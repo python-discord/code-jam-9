@@ -110,6 +110,16 @@ class Ball(pygame.sprite.Sprite):
         #         lerp(self.rect.centery, position[1], FPS / mps)
         #     )
 
+class Breakout(pygame.sprite.Sprite):
+
+    def __init__(self, size=(100, 100)):
+        """Initialize a breackout sprite."""
+
+        super().__init__()
+        self.image = pygame.Surface(size)
+        self.image.fill((255, 255, 255))
+        self.rect = self.image.get_rect()
+
 
 class Client:
     """The pong game client."""
@@ -162,6 +172,9 @@ class Client:
             screen (pygame.Surface): The game screen.
         """
         ball = Ball()
+        block = Breakout()
+        block_group = pygame.sprite.GroupSingle(ball)
+        block_group.draw(screen)
         ball_group = pygame.sprite.GroupSingle(ball)
         local_paddle = Paddle(number=self.player_number)
         self.paddles[self.player_number] = local_paddle
