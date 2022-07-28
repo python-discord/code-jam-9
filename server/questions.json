@@ -1,0 +1,29 @@
+{
+    "questions": [
+        {
+            "question_type": "multiple_choice",
+            "traceback": "SyntaxError: unterminated string literal (detected at line 1)",
+            "code": "print('a\")",
+            "question": "Which line of code would fix this error?",
+            "possible_answers": [
+                "print \"a\"",
+                "print(\"a\");",
+                "print(\"a\")",
+                "print 'a'"
+            ],
+            "correct_answer": "2"
+        },
+        {
+            "question_type": "user_input",
+            "traceback": "SyntaxError: invalid syntax",
+            "code": "a = new int(2)",
+            "question": "Write code that would fix this error.",
+            "answers": [
+                "a = int(2)",
+                "a=int(2)",
+                "a = 2",
+                "a=2"
+            ]
+        }
+    ]
+}
