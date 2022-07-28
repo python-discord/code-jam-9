@@ -59,11 +59,15 @@ class Bricks:
 
         return brick_list
 
+    def delete_brick(self, brick):
+        self.brick_list.remove(brick)
+
     def to_json(self):
         data = []
         for position, brick in enumerate(self.brick_list):
             data.append({"position": brick.position})
         return data
+
 
         # data = [list(brick.position) for brick self.brick_list]
         # return data
@@ -156,7 +160,6 @@ class Server:
                 'bounce': self.ball.ball_bounced,
             }
         }
-        print(updates)
         websockets.broadcast(self.client_websockets, json.dumps(updates))
 
 
