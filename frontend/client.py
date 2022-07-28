@@ -29,7 +29,7 @@ def lerp(value: float, new_value: float, multiplier: float) -> float:
     return value + (multiplier * (new_value - value))
 
 
-class Paddle(pygame.sprite.Sprite):  # Read pygame documentation on sprites and groups
+class Paddle(pygame.sprite.Sprite):
     """The paddle sprite."""
 
     def __init__(self, size: tuple[int, int] = (10, 100), number: int = 0, direction: int = 1, local: bool = True):
@@ -69,7 +69,7 @@ class Paddle(pygame.sprite.Sprite):  # Read pygame documentation on sprites and 
             players (dict): A dict containing the players.
         """
         if self.local:
-            mouse_pos = pygame.mouse.get_pos()[self.direction]  # Mouse y value
+            mouse_pos = pygame.mouse.get_pos()[self.direction]
             if self.direction == 0:
                 self.rect.centerx = clamp(mouse_pos, self.rect.width / 2, SCREEN_WIDTH - self.rect.width / 2)
             else:
@@ -102,6 +102,7 @@ class Ball(pygame.sprite.Sprite):
             position (tuple): The XY coordinates of the ball.
         """
         self.rect.center = position
+        # Disabled lerp
         # if mps == 0:
         #     self.rect.center = position
         # else:
@@ -136,12 +137,12 @@ class Client:
         self.main_menu = pygame_menu.Menu('', width=self.screen_size[0], height=self.screen_size[1], theme=menu_theme)
         self.ip_widget = self.main_menu.add.text_input("Host IP: ", default='zesty-zombies.pshome.me')
         self.main_menu.add.button("Connect", self.establish_connection, self.ip_widget)
-        self.main_menu.add.button("Quit", pygame_menu.events.EXIT)
+        self.main_menu.add.button("Quit", self.exit)
 
         self.pause_menu = pygame_menu.Menu('', width=self.screen_size[0], height=self.screen_size[1], theme=menu_theme)
         self.pause_menu.add.button("Resume", lambda: self.pause_menu.disable())
         self.pause_menu.add.button("Disconnect", self.disconnect)
-        self.pause_menu.add.button("Quit", pygame_menu.events.EXIT)
+        self.pause_menu.add.button("Quit", self.exit)
 
     def main(self):
         self.stop_event.set()
@@ -153,13 +154,18 @@ class Client:
         self.paddles = {}
         self.player_number = None
 
+    def exit(self):
+        self.disconnect()
+        pygame.quit()
+        raise SystemExit
+
     def disconnect(self):
         self.stop_event.set()
         self.network_stop_event.set()
         self.pause_menu.disable()
         self.cleanup()
 
-    def establish_connection(self, ip_widget: str):
+    def establish_connection(self, ip_widget):
         try:
             self.main_menu.remove_widget('msg')
         except (ValueError, AssertionError):  # AssertionError because pygame-menu uses a random assert
@@ -220,8 +226,7 @@ class Client:
             events = pygame.event.get()
             for event in events:
                 if event.type == QUIT:
-                    self.network_stop_event.set()
-                    raise SystemExit
+                    self.exit()
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
                         self.pause_menu.enable()
