@@ -7,6 +7,11 @@ import random
 from ball import Ball
 import websockets
 
+x_pattern = [[.25, .5, 50, 10, 1], [.35, .5, 50, 10, 1], [.65, .5, 50, 10, 1], [.75, .5, 50, 10, 1],
+             [.5, .25, 10, 50, 1], [.5, .35, 10, 50, 1], [.5, .65, 10, 50, 1], [.5, .75, 10, 50, 1],
+             [.45, .5, 10, 50, 1], [.55, .5, 10, 50, 1],
+             [.5, .45, 50, 10, 1], [.5, .55, 50, 10, 1]
+             ]
 
 class Player:
     """Player data."""
@@ -36,36 +41,35 @@ class Player:
 
 
 class Brick:
-    def __init__(self, position_x: int, position_y: int, size: tuple = (10, 50)):
+    def __init__(self, position_x: int, position_y: int, size: tuple = (10, 50), points:int = 1):
         self.size = size
         self.position = (position_x, position_y)
-        self.points = 1
+        self.points = points
 
 
 class Bricks:
     def __init__(self, screen_size, server_reference):
         self.screen_size = screen_size
-        self.brick_list = self.generate_bricks()
+        self.brick_list = []
+        self.generate_based_on_pattern(x_pattern)
         self.server = server_reference
 
-    def generate_bricks(self):
-        brick_list = []
-        y_offset = 150
-        x_offset = 0
-        for r in range(1, 5):
-            brick = Brick(self.screen_size[0]//2, y_offset * r)
-            x_offset += 100
-            brick_list.append(brick)
-
-        return brick_list
+    def generate_based_on_pattern(self, pattern):
+        for p in pattern:
+            self.brick_list.append(Brick(self.screen_size[0]*p[0],
+                                         self.screen_size[1]*p[1],
+                                         (p[2], p[3]),
+                                         p[4]
+                                         ))
 
     def delete_brick(self, brick):
         self.brick_list.remove(brick)
 
+
     def to_json(self):
         data = []
         for position, brick in enumerate(self.brick_list):
-            data.append({"position": brick.position})
+            data.append({"position": brick.position, "size": brick.size})
         return data
 
 

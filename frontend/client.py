@@ -15,8 +15,6 @@ SCREEN_WIDTH = 700
 SCREEN_HEIGHT = 700
 PADDLE_WIDTH = 10
 PADDLE_HEIGHT = 100
-BRICK_WIDTH = 10
-BRICK_HEIGHT = 100
 FPS = 60
 ANGLE_MULTIPLIER = 75
 
@@ -170,7 +168,8 @@ class Client:
                         if not len(updates['bricks']) == len(self.bricks):
                             self.bricks = []
                             for brick in updates['bricks']:
-                                self.bricks.append(Brick())
+                                print(brick)
+                                self.bricks.append(Brick(brick['size']))
         except websockets.ConnectionClosed:
             self.stop_event.set()
 
