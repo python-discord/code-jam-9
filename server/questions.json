@@ -17,7 +17,7 @@
             "question_type": "user_input",
             "traceback": "SyntaxError: invalid syntax",
             "code": "a = new int(2)",
-            "question": "What code would fix this error.",
+            "question": "Which line of code would fix this error?",
             "answers": [
                 "a = int(2)",
                 "a=int(2)",
@@ -30,7 +30,7 @@
             "question_type": "user_input",
             "traceback": "TypeError: unsupported operand type(s) for +: 'int' and 'str'",
             "code": "x =4\ny = \"a\"\nx + y",
-            "question": "Which version would result in the string \"4a\"?",
+            "question": "Which line of code would result in the string \"4a\"?",
             "answers": [
                 "str(x) + y",
                 "f\"{x + y}\"",
@@ -77,5 +77,33 @@
                 "y = list(x)"
             ]
         },
+        {
+        
+            "question_type": "user_input",
+            "traceback": "'str' object does not support item assignment",
+            "code": "x=\"a1\"",
+            "question": "Which line of code would evaluate to \"a1\"?",
+            "answers": [
+                "x[1] = \"2\"",
+                "x.replace(1, 2)",
+                "x = f\"{x}2\"",
+                "x.replace(\"1\", \"2\")"
+            ]
+        },
+        {
+        
+            "question_type": "user_input",
+            "traceback": "AttributeError: 'list' object has no attribute 'add'",
+            "code": "x = [1, 2, 3]\ny = [4, 5]\nx.add(y)",
+            "question": "Which line of code would concatenate x and y?",
+            "answers": [
+                "x.append(y)",
+                "x[:] = y",
+                "x = list(x, y)",
+                "x.extend(y)"
+            ]
+        },
+
+
     ]
 }
