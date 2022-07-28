@@ -11,13 +11,13 @@
                 "print(\"a\")",
                 "print 'a'"
             ],
-            "correct_answer": "2"
+            "correct_answer": 2
         },
         {
             "question_type": "user_input",
             "traceback": "SyntaxError: invalid syntax",
             "code": "a = new int(2)",
-            "question": "Which line of code would fix this error?",
+            "question": "Fix the given line of code.",
             "answers": [
                 "a = int(2)",
                 "a=int(2)",
@@ -31,12 +31,13 @@
             "traceback": "TypeError: unsupported operand type(s) for +: 'int' and 'str'",
             "code": "x =4\ny = \"a\"\nx + y",
             "question": "Which line of code would result in the string \"4a\"?",
-            "answers": [
+            "possible_answers": [
                 "str(x) + y",
                 "f\"{x + y}\"",
                 "f\"{str(x)y}\"",
                 "f\"{str(x)}y\""
-            ]
+            ],
+            "correct_answer": 0
         },
         {
         
@@ -44,12 +45,13 @@
             "traceback": "ValueError: min() arg is an empty sequence",
             "code": "x = y = [2] * 2\na = min(x)\nx.pop()\nx.pop()\na == min(y)",
             "question": "What change to the first line would make the last line evaluate to True?",
-            "answers": [
+            "possible_answers": [
                 "x = y = [2, 2]",
                 "x = y = [2]\nx.append(2)",
                 "x = [2] * 2\n y = x.copy()",
                 "x = [2, 2]\ny = x"
-            ]
+            ],
+            "correct_answer": 2
         },
         {
         
@@ -57,38 +59,41 @@
             "traceback": "TypeError: unhashable type: 'list'",
             "code": "x = [1, 2]\n{x : 1}",
             "question": "What change, inserted after the first line, would cause this snippet to run without an error?",
-            "answers": [
+            "possible_answers": [
                 "x.pop()",
                 "x = [str(el) for el in x]",
                 "hash(x)",
                 "x = tuple(x)"
-            ]
+            ],
+            "correct_answer": 3
         },
         {
         
             "question_type": "multiple_choice",
             "traceback": "ValueError: min() arg is an empty sequence",
-            "code": "",
+            "code": "x = ([1], [2])\ny = x\nx[0].pop()\nmin(y[0])",
             "question": "What change, inserted after the first line, would cause the last line to evaluate to 1?",
-            "answers": [
+            "possible_answers": [
                 "y = x.copy",
                 "y = (x[0].copy(), x[1].copy())",
                 "y = (x[0], x[1])",
                 "y = list(x)"
-            ]
+            ],
+            "correct_answer": 1
         },
         {
         
             "question_type": "multiple_choice",
             "traceback": "'str' object does not support item assignment",
-            "code": "x=\"a1\"",
-            "question": "Which line of code would evaluate to \"a1\"?",
-            "answers": [
+            "code": "x=\"a1\"\nx[-1]=\"2\"",
+            "question": "Which line of code, replaced with the last line, would evaluate to \"a1\"?",
+            "possible_answers": [
                 "x[1] = \"2\"",
                 "x.replace(1, 2)",
                 "x = f\"{x}2\"",
                 "x.replace(\"1\", \"2\")"
-            ]
+            ],
+            "correct_answer": 3
         },
         {
         
@@ -101,9 +106,8 @@
                 "x[:] = y",
                 "x = list(x, y)",
                 "x.extend(y)"
-            ]
-        },
-
-
+            ],
+            "correct_answer": 3
+        }
     ]
 }
