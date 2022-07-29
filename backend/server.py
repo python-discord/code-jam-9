@@ -76,7 +76,7 @@ class Server:
                         'type': 'join',
                         'data': {
                             'new': player.player_number,
-                            'ingame': list(self.active_clients.keys())
+                            'ingame': [k for k in self.active_clients.keys() if k != player.player_number],
                         }
                     }
                     websockets.broadcast(
