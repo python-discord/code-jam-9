@@ -11,13 +11,15 @@
       <div class="Game-container">
         <textarea class="Code-area">Code to Debug</textarea>
       </div>
-      <div class="Game-container">
-        <label for="uname">Username:</label><br>
-        <input class="Input-field" type="text" id="uname" name="uname" value=""><br>
-        <button class="Input-field" id="submit">Submit</button><br><br>
-        <label for="pcount">Max Players:</label><br>
-        <input class="Input-field" type="text" id="pcount" name="pcount" value=""><br>
-        <button class="Input-field" id="submit">Submit</button>
+      <div class="Setup-menu">
+        <label for="input" id="input-label">Connecting to server...</label><br>
+        <input class="Input-field" type="text" id="input" name="input" value="" disabled="true"><br>
+        <button class="Input-field" id="input-button" disabled="true" onclick={handleSetup()}>Submit</button><br>
+      </div>
+      <div class="Player-data">
+        Player Count: <span id="player-count"> <br>Connecting...<br></span><br>
+        Online Players:<br>
+        <ul class="Player-list" id="player-list"></ul>
       </div>
     </div>
   </body>

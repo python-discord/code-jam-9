@@ -3,19 +3,34 @@
   color: white;
 }
 
-.App-container{
+.App-container {
   display: flex;
   flex-flow: row wrap;
   margin: 3vh;
 }
 
-.Code-area{
+.Code-area {
   background-color: rgb(30, 30, 30);
   color: white;
   width: 80%;
   height: 70vh;
   border: none;
   resize: none;
+  font-size: 14px;
+}
+
+.Setup-menu {
+  width: 20vw;
+}
+
+.Player-data {
+  width: 15vw;
+  margin-left: auto;
+  text-align: right;
+}
+
+.Player-list {
+  list-style: none;
 }
 
 .Game-container {
