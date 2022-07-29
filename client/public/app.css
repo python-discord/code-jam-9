@@ -13,20 +13,34 @@
   background-color: rgb(30, 30, 30);
   color: white;
   width: 80%;
-  height: 70vh;
+  height: 65vh;
+  border: none;
+  resize: none;
+  font-size: 14px;
+}
+
+.Debug-area {
+  background-color: rgb(30, 30, 30);
+  color: white;
+  width: 80%;
+  height: 20vh;
   border: none;
   resize: none;
   font-size: 14px;
 }
 
 .Setup-menu {
+
   width: 20vw;
 }
 
 .Player-data {
+  background-color: rgb(30, 30, 30);
+  padding: 3vh;
   width: 15vw;
+  height: 60vh;
   margin-left: auto;
-  text-align: right;
+  text-align: left;
 }
 
 .Player-list {
@@ -34,12 +48,15 @@
 }
 
 .Game-container {
-  align-items: center;
-  justify-content: center;
+  align-items: left;
+  justify-content: left;
   width: 46vw;
   height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .Input-field {
   margin-top: 1vh;
+  width: fit-content;
 }

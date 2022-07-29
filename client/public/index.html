@@ -9,15 +9,18 @@
   <body class="App">
     <div class="App-container">
       <div class="Game-container">
-        <textarea class="Code-area">Code to Debug</textarea>
+        <textarea class="Code-area" id="code-area" wrap="off">Code to Debug</textarea><br>
+        <textarea class="Debug-area" id="debug-area" disabled="true">Debug Responses</textarea><br>
+        <button class="Input-field" id="run-button" onclick={runCode()}>Run Code</button><br>
       </div>
       <div class="Setup-menu">
+        </div>
+      <div class="Player-data">
         <label for="input" id="input-label">Connecting to server...</label><br>
         <input class="Input-field" type="text" id="input" name="input" value="" disabled="true"><br>
         <button class="Input-field" id="input-button" disabled="true" onclick={handleSetup()}>Submit</button><br>
-      </div>
-      <div class="Player-data">
-        Player Count: <span id="player-count"> <br>Connecting...<br></span><br>
+        <br><br>
+        Player Count: <span id="player-count">Connecting...<br></span><br>
         Online Players:<br>
         <ul class="Player-list" id="player-list"></ul>
       </div>

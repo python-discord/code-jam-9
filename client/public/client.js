@@ -63,3 +63,7 @@ function sendULimit() {
     "ulimit": ulimit
   }));
 }
+
+function runCode() {
+  // TODO: send code to server
+}
