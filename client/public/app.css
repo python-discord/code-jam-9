@@ -47,6 +47,10 @@
   list-style: none;
 }
 
+.Error {
+  color: red;
+}
+
 .Game-container {
   align-items: left;
   justify-content: left;

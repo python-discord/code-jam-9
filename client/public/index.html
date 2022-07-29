@@ -16,11 +16,13 @@
       <div class="Setup-menu">
         </div>
       <div class="Player-data">
-        <label for="input" id="input-label">Connecting to server...</label><br>
-        <input class="Input-field" type="text" id="input" name="input" value="" disabled="true"><br>
-        <button class="Input-field" id="input-button" disabled="true" onclick={handleSetup()}>Submit</button><br>
+        <label for="input" id="input-label">Server Address:</label><br>
+        <input class="Input-field" type="text" id="input" name="input" value="localhost:8081"><br>
+        <button class="Input-field" id="input-button" onclick={handleSetup()}>Submit</button><br>
+        <br>
+        <span class="Error" id="error-field"></span>
         <br><br>
-        Player Count: <span id="player-count">Connecting...<br></span><br>
+        Player Count: <span id="player-count">Waiting...<br></span><br>
         Online Players:<br>
         <ul class="Player-list" id="player-list"></ul>
       </div>
