@@ -26,7 +26,7 @@
             ]
         },
         {
-        
+
             "question_type": "multiple_choice",
             "traceback": "TypeError: unsupported operand type(s) for +: 'int' and 'str'",
             "code": "x =4\ny = \"a\"\nx + y",
@@ -40,7 +40,7 @@
             "correct_answer": 0
         },
         {
-        
+
             "question_type": "multiple_choice",
             "traceback": "ValueError: min() arg is an empty sequence",
             "code": "x = y = [2] * 2\na = min(x)\nx.pop()\nx.pop()\na == min(y)",
@@ -54,7 +54,7 @@
             "correct_answer": 2
         },
         {
-        
+
             "question_type": "multiple_choice",
             "traceback": "TypeError: unhashable type: 'list'",
             "code": "x = [1, 2]\n{x : 1}",
@@ -68,7 +68,7 @@
             "correct_answer": 3
         },
         {
-        
+
             "question_type": "multiple_choice",
             "traceback": "ValueError: min() arg is an empty sequence",
             "code": "x = ([1], [2])\ny = x\nx[0].pop()\nmin(y[0])",
@@ -82,7 +82,7 @@
             "correct_answer": 1
         },
         {
-        
+
             "question_type": "multiple_choice",
             "traceback": "'str' object does not support item assignment",
             "code": "x=\"a1\"\nx[-1]=\"2\"",
@@ -96,7 +96,7 @@
             "correct_answer": 3
         },
         {
-        
+
             "question_type": "multiple_choice",
             "traceback": "AttributeError: 'list' object has no attribute 'add'",
             "code": "x = [1, 2, 3]\ny = [4, 5]\nx.add(y)",
