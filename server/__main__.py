@@ -61,9 +61,9 @@ async def send_user_count_event() -> None:
         if user_count != len(CONNECTIONS):
             # There should be an extra user if one has joined, and a missing
             # one if one has left
-            user_count = len(CONNECTIONS)
             current_users = CONNECTIONS.current_users
             event_type = "user_join" if user_count < len(CONNECTIONS) else "user_leave"
+            user_count = len(CONNECTIONS)
             websockets.broadcast(
                 CONNECTIONS.data.values(),
                 f'{{"event": "{event_type}", "count": {user_count}, "uname_list": {current_users}}}',
