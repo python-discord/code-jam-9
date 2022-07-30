@@ -3,6 +3,7 @@
 import asyncio
 import json
 import os
+from this import d
 import threading
 
 # Suppress pygame's hello message
@@ -45,6 +46,7 @@ class Paddle(pygame.sprite.Sprite):
         self.direction = direction
         self.size = size
         self.number = number
+        self.score = 0
         if self.number > 1:
             self.direction = 0
         if self.direction == 0:
@@ -132,6 +134,7 @@ class Client:
         self.average_mps = 0
 
         pygame.init()
+        self.myfont = pygame.font.SysFont("monospace", 16)
         self.screen = pygame.display.set_mode(self.screen_size)
 
         self.main_menu = pygame_menu.Menu('', width=self.screen_size[0], height=self.screen_size[1], theme=menu_theme)
@@ -210,6 +213,15 @@ class Client:
         except websockets.ConnectionClosed:
             self.stop_event.set()
 
+    def get_score_text(self):
+        text = ''
+        for key in self.paddles:
+            if key == self.player_number:
+                text += "You: {}".format(self.paddles[key].score)
+            else:
+                text += 'Player {}: {}'.format(key, self.paddles[key].score)
+        return text
+
     def start_game(self):
         """Run the game."""
         self.start_event.clear()
@@ -239,6 +251,10 @@ class Client:
             self.screen.fill((0, 0, 0))
             ball_group.draw(self.screen)
             self.paddle_group.draw(self.screen)
+            scores_text = self.get_score_text()
+            print(scores_text)
+            scoretext = self.myfont.render(scores_text, 1, (255,255,255))
+            self.screen.blit(scoretext, (5, 10))
             pygame.display.flip()  # Updates the display
             clock.tick(self.fps)
             counter += 1
