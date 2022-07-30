@@ -25,7 +25,7 @@ class Player:
         self.paddle_position = (0, 0)
         self.paddle_size = (10, 100)
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         """Return a dict with the player data.
 
         Returns:
@@ -81,9 +81,10 @@ class Bricks:
 class Server:
     """The pong game server."""
 
-    def __init__(self):
+    def __init__(self, screen_size: tuple[int, int] = (700, 700), max_players: int = 4):
         """Initialize the player and ball data."""
-        self.last_client_bounced: Player = None  # The paddle that the ball last bounced off of
+        self.screen_size = screen_size
+        self.max_players = max_players
         self.active_clients: dict[int, Player] = {}
         self.client_websockets = []
         # Ball variables
@@ -92,11 +93,12 @@ class Server:
         self.paddle_size = (10, 100)
         self.ball = Ball(self.screen_size, self)
         self.bricks = Bricks(self.screen_size, self)
+        self.last_client_bounced: Player = None
 
 
     async def main(self):
         """Process a game loop tick."""
-        async with websockets.serve(self.handler, '0.0.0.0', 8765):
+        async with websockets.serve(self.handler, '0.0.0.0', 8765):  # type: ignore
             while True:
                 await self.game_update()
                 await self.broadcast_updates()
@@ -104,13 +106,13 @@ class Server:
 
     async def handler(self, websocket):
         """Handle websocket connections."""
-        try:
-            if len(self.active_clients) >= self.max_players:
-                await websocket.close(reason="Only four players at once.")
+        if len(self.active_clients) >= self.max_players:
+            await websocket.close(reason="Only four players at once.")
 
-            self.client_websockets.append(websocket)
-            player = Player(websocket.id, len(self.active_clients), websocket)
-            self.active_clients[player.player_number] = player
+        self.client_websockets.append(websocket)
+        player = Player(websocket.id, len(self.active_clients), websocket)
+        self.active_clients[player.player_number] = player
+        try:
             async for message in websocket:
                 event = json.loads(message)
                 if event['type'] == 'init':
@@ -118,30 +120,32 @@ class Server:
                         'type': 'join',
                         'data': {
                             'new': player.player_number,
-                            'ingame': list(self.active_clients.keys())
+                            'ingame': [k for k in self.active_clients.keys() if k != player.player_number],
                         }
                     }
-                    websockets.broadcast(
+                    websockets.broadcast(  # type: ignore
                         self.client_websockets,
                         json.dumps(data)
                     )
                 elif event['type'] == 'paddle':
                     # Paddle position update
                     player.paddle_position = event['data']
+        except Exception as e:
+            print(e)
         finally:
             # Clean up the connection
             await websocket.close()
             self.client_websockets.remove(websocket)
             del self.active_clients[player.player_number]  # Clear client num
-            websockets.broadcast(
+            websockets.broadcast(  # type: ignore
                 self.client_websockets,
                 json.dumps({'type': 'leave', 'data': player.player_number})
             )
 
-    def reset_ball(self):
-        """Reset the ball position."""
-        self.ball_position = self.ball_position_start
-        self.ball_speed = self.ball_speed_start
+    def add_score(self):
+        """Update the score."""
+        if self.last_client_bounced is not None:
+            self.last_client_bounced.score += 1
 
     async def game_update(self):
         if self.active_clients:
@@ -164,7 +168,7 @@ class Server:
                 'bounce': self.ball.ball_bounced,
             }
         }
-        websockets.broadcast(self.client_websockets, json.dumps(updates))
+        websockets.broadcast(self.client_websockets, json.dumps(updates))  # type: ignore
 
 
 if __name__ == '__main__':

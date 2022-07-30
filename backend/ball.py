@@ -1,7 +1,8 @@
 import random
+
 class Ball:
     def __init__(self, screen_size, server):
-        self.server = server
+        self.server: Server = server
         self.ball_size = (10, 10)
         self.paddle_size = (10, 100)
         self.ball_position_start: tuple[int, int] = self.randomize_ball_start_position()
@@ -108,7 +109,6 @@ class Ball:
                 print(self.ball_position)
         if self.ball_position[0] < -10 or self.ball_position[1] < -10 or self.ball_position[0] > 750 or self.ball_position[1] > 750:
             self.debug(collided_side)
-            exit()
 
 
                 # self.ball_speed = tuple([x+1 for x in list(self.ball_speed)])
