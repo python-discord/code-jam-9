@@ -150,7 +150,7 @@ class Powerup:
 
     def __init__(self, client):
         pass
-    
+
     def update(self):
         pass
 
@@ -172,6 +172,7 @@ class DisappearPowerup:
     def end(self):
         if not len([powerup for powerup in client.powerups if type(powerup) == DisappearPowerup]) > 1:
             Paddle.color = arcade.color.WHITE
+
 
 class GameView(arcade.View):
     """The game view."""
@@ -219,7 +220,14 @@ class GameView(arcade.View):
                 continue
             paddle.draw()
         for brick in self.client.bricks:
-            brick.draw()
+            brick.draw() 
+        arcade.draw_text(
+            self.client.scores_text,
+            10,
+            10,
+            arcade.csscolor.WHITE,
+            18,
+        )
         self.window.use()
         self.shader.draw()
 
@@ -338,6 +346,7 @@ class Client(arcade.Window):
         self.local_paddle: Paddle = None  # type: ignore
         self.ball: Ball = None  # type: ignore
         self.bricks: list[Brick] = []
+        self.scores_text = 'Get ready!'
         self.powerups: list[Powerup] = []
 
         self.start_event = threading.Event()
@@ -383,6 +392,17 @@ class Client(arcade.Window):
         else:
             self.main_menu_view.menu_message.text = "FAILED TO CONNECT TO SERVER"
 
+    def get_score_text(self):
+        text = ''
+        for key in self.updates['players']:
+            if self.updates['players'][key]['player_number'] == self.player_number:
+                text += "You: {}".format(self.updates['players'][key]['score'])
+            else:
+                text += 'Player {}: {}'.format(
+                    self.updates['players'][key]['player_number']+1,
+                    self.updates['players'][key]['score'])
+        return text
+
     async def network_loop(self, ip: str):
         try:
             async with websockets.connect(f'ws://{ip}:8765') as websocket:  # type: ignore
@@ -415,6 +435,7 @@ class Client(arcade.Window):
                         # Convert keys back to ints because yes
                         updates['players'] = {int(k): v for k, v in updates['players'].items()}
                         self.updates = updates
+                        self.scores_text = self.get_score_text()
                         if not len(updates['bricks']) == len(self.bricks):
                             self.bricks = []
                             for brick in updates['bricks']:

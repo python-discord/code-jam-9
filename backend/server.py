@@ -47,7 +47,7 @@ class Powerup:
         pass
 
     def apply(self, server, player: Player, timer=5):
-        self.user = player 
+        self.user = player
         self.timer = timer * 60
         server.powerups.append(self)
 
@@ -63,6 +63,7 @@ class Brick:
 
     powerups = [DisappearPowerup]
     powerup_chance = 1
+
     def __init__(self, position_x: int, position_y: int, size: tuple = (10, 50), points: int = 1):
         self.size = size
         self.position = (position_x, position_y)
@@ -71,6 +72,7 @@ class Brick:
     def get_powerup(self):
         if random.randint(1, self.powerup_chance) == 1:
             return random.choice(self.powerups)()
+
 
 class Bricks:
 
@@ -189,6 +191,7 @@ class Server:
             if powerup.timer > 0:
                 powerups.append(powerup)
         self.powerups = powerups
+
     async def broadcast_updates(self):
         """Broadcast updates to each connected client."""
         players = {player.player_number: player.to_dict() for player in self.active_clients.values()}
