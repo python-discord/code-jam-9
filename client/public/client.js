@@ -72,6 +72,15 @@ function connectToServer() {
       resetSetup();
     }
 
+    if (message.event == "start_request"){
+        document.getElementById('start-button').disabled = false;
+    }
+
+    if (message.event == "game_start"){
+        document.getElementById('start-button').disabled = true;
+        gameSetup(event_data);
+    }
+
   });
 }
 
@@ -114,6 +123,16 @@ function sendULimit() {
   document.getElementById('input').value = "";
   document.getElementById('input-button').disabled = true;
 }
+
+function sendStartRequest() {
+    console.log("send start request from client");
+    socket.send(JSON.stringify(true));
+}
+
+function gameSetup() {
+
+}
+
 
 function runCode() {
   // TODO: send code to server
