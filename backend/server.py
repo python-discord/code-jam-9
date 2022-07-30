@@ -78,10 +78,11 @@ class Bricks:
     def __init__(self, screen_size, server_reference):
         self.screen_size = screen_size
         self.brick_list = []
-        self.generate_based_on_pattern(x_pattern)
         self.server = server_reference
 
-    def generate_based_on_pattern(self, pattern):
+    def generate_based_on_pattern(self):
+        # todo add random choice patters and more patterns
+        pattern = x_pattern
         for p in pattern:
             self.brick_list.append(Brick(self.screen_size[0]*p[0],
                                          self.screen_size[1]*p[1],
@@ -100,6 +101,9 @@ class Bricks:
         for brick in self.brick_list:
             data.append({"position": brick.position, "size": brick.size})
         return data
+
+    def empty_bricks(self):
+        self.brick_list = []
 
         # data = [list(brick.position) for brick self.brick_list]
         # return data
@@ -168,6 +172,9 @@ class Server:
                 self.client_websockets,
                 json.dumps({'type': 'leave', 'data': player.player_number})
             )
+
+    def add_to_total_bounces(self):
+        self.total_bounces += 1
 
     def add_score(self):
         """Update the score."""
