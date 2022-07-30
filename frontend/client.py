@@ -49,7 +49,7 @@ class Paddle(arcade.Sprite):
     """The paddle sprite."""
 
     color = arcade.color.WHITE
-
+    inverse = False
     def __init__(self, width: int = 10, height: int = 100, number: int = 0, direction: int = 1, local: bool = True):
         """Initialize a paddle sprite.
 
@@ -92,9 +92,15 @@ class Paddle(arcade.Sprite):
         if self.local:
             mouse_pos = position[self.direction]
             if self.direction == 0:
-                self.center_x = self.clamp(mouse_pos, self.width / 2, SCREEN_WIDTH - self.width / 2)
+                if self.inverse:
+                    self.center_x = abs(SCREEN_WIDTH - self.clamp(mouse_pos, self.width / 2, SCREEN_WIDTH - self.width / 2))
+                else:
+                    self.center_x = self.clamp(mouse_pos, self.width / 2, SCREEN_WIDTH - self.width / 2)
             else:
-                self.center_y = self.clamp(mouse_pos, self.height / 2, SCREEN_HEIGHT - self.height / 2)
+                if self.inverse:
+                    self.center_y = abs(SCREEN_HEIGHT - self.clamp(mouse_pos, self.height / 2, SCREEN_HEIGHT - self.height / 2))
+                else:
+                    self.center_y = self.clamp(mouse_pos, self.height / 2, SCREEN_HEIGHT - self.height / 2)
         else:
             self.center_x, self.center_y = position
 
@@ -158,7 +164,7 @@ class Powerup:
         pass
 
 
-class DisappearPowerup:
+class DisappearPowerup(Powerup):
 
     def __init__(self, client) -> None:
         self.timer = 0
@@ -172,6 +178,18 @@ class DisappearPowerup:
     def end(self):
         if not len([powerup for powerup in client.powerups if type(powerup) == DisappearPowerup]) > 1:
             Paddle.color = arcade.color.WHITE
+
+
+class InversePowerup(Powerup):
+
+    def __init__(self, client) -> None:
+        self.timer = 0
+        self.client = client
+        Paddle.inverse = True
+
+    def end(self):
+        if not len([powerup for powerup in client.powerups if type(powerup) == InversePowerup]) > 1:
+            Paddle.inverse = False
 
 
 class GameView(arcade.View):

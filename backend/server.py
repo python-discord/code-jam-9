@@ -58,11 +58,13 @@ class Powerup:
 class DisappearPowerup(Powerup):
     pass
 
+class InversePowerup(Powerup):
+    pass
 
 class Brick:
 
-    powerups = [DisappearPowerup]
-    powerup_chance = 1
+    powerups = [DisappearPowerup, InversePowerup]
+    powerup_chance = 5
 
     def __init__(self, position_x: int, position_y: int, size: tuple = (10, 50), points: int = 1):
         self.size = size
