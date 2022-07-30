@@ -319,10 +319,12 @@ class Client(arcade.Window):
     def get_score_text(self):
         text = ''
         for key in self.updates['players']:
-            if self.updates['players'][key]['player_number']==self.player_number:
+            if self.updates['players'][key]['player_number'] == self.player_number:
                 text += "You: {}".format(self.updates['players'][key]['score'])
             else:
-                text += 'Player {}: {}'.format(self.updates['players'][key]['player_number']+1, self.updates['players'][key]['score'])
+                text += 'Player {}: {}'.format(
+                    self.updates['players'][key]['player_number']+1,
+                    self.updates['players'][key]['score'])
         return text
 
     async def network_loop(self, ip: str):
