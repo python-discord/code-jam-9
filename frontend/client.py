@@ -3,6 +3,8 @@
 import asyncio
 import json
 import math
+import os
+import random
 import threading
 
 import arcade
@@ -10,6 +12,37 @@ import arcade.color
 import arcade.gui
 import arcade.key
 import websockets
+from arcade.experimental.texture_render_target import RenderTargetTexture
+
+
+class ChromaticAberration(RenderTargetTexture):
+    def __init__(self, width, height):
+        super().__init__(width, height)
+        with open(os.path.dirname(os.path.realpath(__file__)) + "/shader.glsl") as file:
+            self.program = self.ctx.program(
+                vertex_shader=""" 
+                #version 330
+
+                in vec2 in_vert;
+                in vec2 in_uv;
+                out vec2 uv;
+
+                void main() {
+                    gl_Position = vec4(in_vert, 0.0, 1.0);
+                    uv = in_uv;
+                }
+                """,
+                fragment_shader=file.read()
+                
+            )
+        self.program["resolution"] = (width, height)
+
+    def use(self):
+        self._fbo.use()
+
+    def draw(self):
+        self.texture.use(0)
+        self._quad_fs.render(self.program)
 
 
 class Paddle(arcade.Sprite):
@@ -66,7 +99,6 @@ class Paddle(arcade.Sprite):
             self.center_x, self.center_y = position
 
     def draw(self):
-        print(self.color)
         arcade.draw_rectangle_filled(self.center_x, self.center_y, self.width, self.height, self.color)
 
 
@@ -147,6 +179,8 @@ class GameView(arcade.View):
     def __init__(self, client: "Client"):
         super().__init__()
         self.client = client
+        self.shader = ChromaticAberration(SCREEN_WIDTH, SCREEN_HEIGHT)
+        self.timer = 0
 
     def on_show_view(self):
         self.client.set_mouse_visible(False)
@@ -155,6 +189,9 @@ class GameView(arcade.View):
         self.client.set_mouse_visible(True)
 
     def on_update(self, delta_time: float):
+        if (random.randint(1,30) > 2):
+            self.timer += delta_time
+            self.shader.program["time"] = self.timer
         if not self.client.updates:
             return
         if self.client.stop_event.is_set():
@@ -169,9 +206,12 @@ class GameView(arcade.View):
             brick.update(position=self.client.updates['bricks'][index]["position"])
         for powerup in self.client.powerups:
             powerup.update()
+        self.shader.program["glitch"] = len(self.client.powerups) > 0
 
     def on_draw(self):
         self.clear()
+        self.shader.clear()
+        self.shader.use()
         self.client.local_paddle.draw()
         self.client.ball.draw()
         for paddle in self.client.paddles.values():
@@ -180,6 +220,8 @@ class GameView(arcade.View):
             paddle.draw()
         for brick in self.client.bricks:
             brick.draw()
+        self.window.use()
+        self.shader.draw()
 
     def on_mouse_motion(self, x, y, dx, dy):
         if self.client.local_paddle:
@@ -383,7 +425,7 @@ class Client(arcade.Window):
                             self.powerups = []
                             for powerup in updates['powerups']:
                                 if not powerup["user"] == self.local_paddle.number:
-                                    self.powerups.append(globals()[powerup["type"]]())
+                                    self.powerups.append(globals()[powerup["type"]](self))
         except websockets.ConnectionClosed:  # type: ignore
             self.stop_event.set()
 

@@ -95,7 +95,7 @@ class Ball:
             # print('new ball angle', self.ball_angle)
             self.total_bounces += 1
 
-        if random.randint(5 - 15) < self.total_bounces < 10000:
+        if random.randint(5, 15) < self.total_bounces < 10000:
             self.server.bricks.generate_based_on_pattern()
             self.total_bounces = 10000
 
