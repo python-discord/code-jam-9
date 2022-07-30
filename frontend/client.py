@@ -20,7 +20,7 @@ class ChromaticAberration(RenderTargetTexture):
         super().__init__(width, height)
         with open(os.path.dirname(os.path.realpath(__file__)) + "/shader.glsl") as file:
             self.program = self.ctx.program(
-                vertex_shader=""" 
+                vertex_shader="""
                 #version 330
 
                 in vec2 in_vert;
@@ -33,7 +33,7 @@ class ChromaticAberration(RenderTargetTexture):
                 }
                 """,
                 fragment_shader=file.read()
-                
+
             )
         self.program["resolution"] = (width, height)
 
@@ -50,6 +50,7 @@ class Paddle(arcade.Sprite):
 
     color = arcade.color.WHITE
     inverse = False
+
     def __init__(self, width: int = 10, height: int = 100, number: int = 0, direction: int = 1, local: bool = True):
         """Initialize a paddle sprite.
 
@@ -93,14 +94,18 @@ class Paddle(arcade.Sprite):
             mouse_pos = position[self.direction]
             if self.direction == 0:
                 if self.inverse:
-                    self.center_x = abs(SCREEN_WIDTH - self.clamp(mouse_pos, self.width / 2, SCREEN_WIDTH - self.width / 2))
+                    self.center_x = abs(SCREEN_WIDTH - self.clamp(
+                        mouse_pos, self.width / 2, SCREEN_WIDTH - self.width / 2))
                 else:
-                    self.center_x = self.clamp(mouse_pos, self.width / 2, SCREEN_WIDTH - self.width / 2)
+                    self.center_x = self.clamp(
+                        mouse_pos, self.width / 2, SCREEN_WIDTH - self.width / 2)
             else:
                 if self.inverse:
-                    self.center_y = abs(SCREEN_HEIGHT - self.clamp(mouse_pos, self.height / 2, SCREEN_HEIGHT - self.height / 2))
+                    self.center_y = abs(SCREEN_HEIGHT - self.clamp(
+                        mouse_pos, self.height / 2, SCREEN_HEIGHT - self.height / 2))
                 else:
-                    self.center_y = self.clamp(mouse_pos, self.height / 2, SCREEN_HEIGHT - self.height / 2)
+                    self.center_y = self.clamp(
+                        mouse_pos, self.height / 2, SCREEN_HEIGHT - self.height / 2)
         else:
             self.center_x, self.center_y = position
 
@@ -208,7 +213,7 @@ class GameView(arcade.View):
         self.client.set_mouse_visible(True)
 
     def on_update(self, delta_time: float):
-        if (random.randint(1,30) > 2):
+        if (random.randint(1, 30) > 2):
             self.timer += delta_time
             self.shader.program["time"] = self.timer
         if not self.client.updates:
@@ -238,7 +243,7 @@ class GameView(arcade.View):
                 continue
             paddle.draw()
         for brick in self.client.bricks:
-            brick.draw() 
+            brick.draw()
         arcade.draw_text(
             self.client.scores_text,
             10,

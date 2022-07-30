@@ -58,8 +58,10 @@ class Powerup:
 class DisappearPowerup(Powerup):
     pass
 
+
 class InversePowerup(Powerup):
     pass
+
 
 class Brick:
 
@@ -179,10 +181,10 @@ class Server:
     def add_to_total_bounces(self):
         self.total_bounces += 1
 
-    def add_score(self):
+    def add_score(self, points: int = 1):
         """Update the score."""
         if self.last_client_bounced is not None:
-            self.last_client_bounced.score += 1
+            self.last_client_bounced.score += points
 
     async def game_update(self):
         if self.active_clients:
