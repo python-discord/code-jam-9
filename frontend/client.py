@@ -5,23 +5,10 @@ import json
 import threading
 
 import arcade
+import arcade.color
+import arcade.gui
+import arcade.key
 import websockets
-
-# menu_theme = pygame_menu.Theme(
-#     background_color=(0, 0, 0, 0),
-#     widget_font=pygame_menu.font.FONT_MUNRO,
-#     title_bar_style=pygame_menu.widgets.MENUBAR_STYLE_NONE,
-# )
-
-
-def clamp(value: float, min_value: float, max_value: float) -> float:
-    """Restrict the provided value to be between a minimum and maximum."""
-    return min(max(value, min_value), max_value)
-
-
-def lerp(value: float, new_value: float, multiplier: float) -> float:
-    """Do linear interpolation on the provided value."""
-    return value + (multiplier * (new_value - value))
 
 
 class Paddle(arcade.Sprite):
@@ -57,6 +44,10 @@ class Paddle(arcade.Sprite):
         elif self.number == 3:
             self.center_y = SCREEN_HEIGHT - 30
 
+    def clamp(self, value: float, min_value: float, max_value: float) -> float:
+        """Restrict the provided value to be between a minimum and maximum."""
+        return min(max(value, min_value), max_value)
+
     def update(self, position: tuple[int, int]):
         """Update the paddle location.
 
@@ -66,9 +57,9 @@ class Paddle(arcade.Sprite):
         if self.local:
             mouse_pos = position[self.direction]
             if self.direction == 0:
-                self.center_x = clamp(mouse_pos, self.width / 2, SCREEN_WIDTH - self.width / 2)
+                self.center_x = self.clamp(mouse_pos, self.width / 2, SCREEN_WIDTH - self.width / 2)
             else:
-                self.center_y = clamp(mouse_pos, self.height / 2, SCREEN_HEIGHT - self.height / 2)
+                self.center_y = self.clamp(mouse_pos, self.height / 2, SCREEN_HEIGHT - self.height / 2)
         else:
             self.center_x, self.center_y = position
 
@@ -103,14 +94,150 @@ class Ball(arcade.Sprite):
         arcade.draw_rectangle_filled(self.center_x, self.center_y, self.width, self.height, self.color)
 
 
+class GameView(arcade.View):
+    """The game view."""
+
+    def __init__(self, client: "Client"):
+        super().__init__()
+        self.client = client
+
+    def on_show_view(self):
+        self.client.set_mouse_visible(False)
+
+    def on_hide_view(self):
+        self.client.set_mouse_visible(True)
+
+    def on_update(self, delta_time: float):
+        if not self.client.updates:
+            return
+        if self.client.stop_event.is_set():
+            self.client.exit()
+        self.client.ball.update(self.client.updates['ball'])
+        for number, paddle in self.client.paddles.items():
+            try:
+                paddle.update(position=self.client.updates['players'][number]['position'])
+            except KeyError:  # When updates variable hasn't been updated yet
+                pass
+
+    def on_draw(self):
+        self.clear()
+        self.client.local_paddle.draw()
+        self.client.ball.draw()
+        for paddle in self.client.paddles.values():
+            if paddle.number == self.client.player_number:  # Remove after updating server deployment
+                continue
+            paddle.draw()
+
+    def on_mouse_motion(self, x, y, dx, dy):
+        if self.client.local_paddle:
+            self.client.local_paddle.update(position=(x, y))
+
+    def on_key_press(self, symbol: int, modifiers: int):
+        if symbol == arcade.key.ESCAPE:
+            self.client.pause()
+
+
+class MainMenuView(arcade.View):
+    """The main menu view."""
+
+    def __init__(self, client: "Client"):
+        super().__init__()
+        self.client = client
+
+        self.manager = arcade.gui.UIManager()
+        v_box = arcade.gui.UIBoxLayout()
+
+        ip_title = arcade.gui.UILabel(text="SERVER IP:", font_size=20, font_color=arcade.color.WHITE)
+        v_box.add(ip_title)
+
+        ip_input = arcade.gui.UIInputText(
+            text="zesty-zombies.pshome.me",
+            width=200,
+            text_color=arcade.color.WHITE
+        )
+        v_box.add(ip_input)
+
+        connect_button = arcade.gui.UIFlatButton(text="CONNECT", width=200)
+        connect_button.on_click = lambda event: self.client.connect(ip_input.text)
+        v_box.add(connect_button.with_space_around(bottom=20))
+
+        exit_button = arcade.gui.UIFlatButton(text="EXIT", width=200)
+        exit_button.on_click = lambda event: self.client.exit()
+        v_box.add(exit_button.with_space_around(bottom=20))
+
+        self.menu_message = arcade.gui.UILabel(
+            text='',
+            width=400,
+            height=20,
+            align='center',
+            text_color=arcade.color.WHITE
+        )
+        v_box.add(self.menu_message)
+
+        self.manager.add(
+            arcade.gui.UIAnchorWidget(
+                anchor_x="center_x",
+                anchor_y="center_y",
+                child=v_box)
+        )
+
+    def on_show_view(self):
+        self.manager.enable()
+
+    def on_hide_view(self):
+        self.manager.disable()
+
+    def on_draw(self):
+        self.clear()
+        self.manager.draw()
+
+
+class PauseMenuView(arcade.View):
+    """The pause menu view."""
+
+    def __init__(self, client: "Client"):
+        super().__init__()
+        self.client = client
+
+        self.manager = arcade.gui.UIManager()
+        v_box = arcade.gui.UIBoxLayout()
+
+        resume_button = arcade.gui.UIFlatButton(text="RESUME", width=200)
+        resume_button.on_click = lambda event: self.client.resume()
+        v_box.add(resume_button.with_space_around(bottom=20))
+
+        disconnect_button = arcade.gui.UIFlatButton(text="DISCONNECT", width=200)
+        disconnect_button.on_click = lambda event: self.client.disconnect()
+        v_box.add(disconnect_button.with_space_around(bottom=20))
+
+        exit_button = arcade.gui.UIFlatButton(text="EXIT", width=200)
+        exit_button.on_click = lambda event: self.client.exit()
+        v_box.add(exit_button.with_space_around(bottom=20))
+
+        self.manager.add(
+            arcade.gui.UIAnchorWidget(
+                anchor_x="center_x",
+                anchor_y="center_y",
+                child=v_box)
+        )
+
+    def on_show_view(self):
+        self.manager.enable()
+
+    def on_hide_view(self):
+        self.manager.disable()
+
+    def on_draw(self):
+        self.clear()
+        self.manager.draw()
+
+
 class Client(arcade.Window):
     """The pong game client."""
 
     def __init__(self, width: int = 700, height: int = 700, title: str = "Pong"):
-        """Initialize the client."""
         super().__init__(width, height, title)
-        self.set_mouse_visible(False)
-        self.player_number = None
+        self.player_number: int = None
         self.updates: dict = {}
         self.paddles: dict[int, Paddle] = {}
         self.local_paddle: Paddle = None
@@ -120,36 +247,18 @@ class Client(arcade.Window):
         self.stop_event = threading.Event()
         self.network_stop_event = threading.Event()
 
-        # self.manager = arcade.gui.UIManager()
-        # self.manager.enable()
-        # arcade.set_background_color(arcade.color.BLACK)
-        # self.v_box = arcade.gui.UIBoxLayout()
+        self.game_view = GameView(self)
+        self.main_menu_view = MainMenuView(self)
+        self.pause_menu_view = PauseMenuView(self)
 
-        # start_button = arcade.gui.UIFlatButton(text="Start Game", width=200)
-        # start_button.on_click = self.main
-        # self.v_box.add(start_button.with_space_around(bottom=20))
+        arcade.set_background_color(arcade.color.BLACK)
+        self.show_view(self.main_menu_view)
 
-        # settings_button = arcade.gui.UIFlatButton(text="Settings", width=200)
-        # self.v_box.add(settings_button.with_space_around(bottom=20))
+    def pause(self):
+        self.show_view(self.pause_menu_view)
 
-        # self.manager.add(
-        #     arcade.gui.UIAnchorWidget(
-        #         anchor_x="center_x",
-        #         anchor_y="center_y",
-        #         child=self.v_box)
-        # )
-
-        # self.screen = pygame.display.set_mode([width, height])
-
-        # self.main_menu = pygame_menu.Menu('', width=width, height=height, theme=menu_theme)
-        # self.ip_widget = self.main_menu.add.text_input("Host IP: ", default='zesty-zombies.pshome.me')
-        # self.main_menu.add.button("Connect", self.establish_connection, self.ip_widget)
-        # self.main_menu.add.button("Quit", self.exit)
-
-        # self.pause_menu = pygame_menu.Menu('', width=width, height=height, theme=menu_theme)
-        # self.pause_menu.add.button("Resume", lambda: self.pause_menu.disable())
-        # self.pause_menu.add.button("Disconnect", self.disconnect)
-        # self.pause_menu.add.button("Quit", self.exit)
+    def resume(self):
+        self.show_view(self.game_view)
 
     def exit(self):
         self.disconnect()
@@ -159,18 +268,13 @@ class Client(arcade.Window):
     def cleanup(self):
         self.paddles = {}
         self.player_number = None
+        self.show_view(self.main_menu_view)
 
     def disconnect(self):
         self.network_stop_event.set()
-        # self.pause_menu.disable()
         self.cleanup()
 
-    def connect(self, ip):
-        # try:
-        #     self.main_menu.remove_widget('msg')
-        # except (ValueError, AssertionError):  # AssertionError because pygame-menu uses a random assert
-        #     pass
-        # ip = ip_widget.get_value()
+    def connect(self, ip: str):
         self.disconnect()
         self.network_thread = threading.Thread(target=lambda: asyncio.run(self.network_loop(ip)), daemon=True)
         self.network_stop_event.clear()
@@ -178,9 +282,9 @@ class Client(arcade.Window):
         if self.start_event.wait(5):
             self.start_event.clear()
             self.stop_event.clear()
+            self.show_view(self.game_view)
         else:
-            # self.main_menu.add.label("Failed to connect to server", label_id='msg', font_color=(255, 0, 0))
-            print("Failed to connect to server")
+            self.main_menu_view.menu_message.text = "FAILED TO CONNECT TO SERVER"
 
     async def network_loop(self, ip: str):
         try:
@@ -217,34 +321,10 @@ class Client(arcade.Window):
         except websockets.ConnectionClosed:
             self.stop_event.set()
 
-    def on_update(self, delta_time: float):
-        if not self.updates:
-            return
-        if self.stop_event.is_set():
-            self.exit()
-        self.clear()
-        self.local_paddle.draw()
-        self.ball.update(self.updates['ball'])
-        self.ball.draw()
-        for number, paddle in self.paddles.items():
-            try:
-                paddle.update(position=self.updates['players'][number]['position'])
-                paddle.draw()
-            except KeyError:  # When updates variable hasn't been updated yet
-                pass
-
-    def on_mouse_motion(self, x, y, dx, dy):
-        self.local_paddle.update(position=(x, y))
-
-    def on_key_press(self, symbol: int, modifiers: int):
-        if symbol == arcade.key.ESCAPE:
-            self.exit()
-
 
 SCREEN_WIDTH = 700
 SCREEN_HEIGHT = 700
 
 if __name__ == '__main__':
     client = Client()
-    client.connect('localhost')
     client.run()
