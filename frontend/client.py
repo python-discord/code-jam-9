@@ -118,7 +118,7 @@ class Powerup:
 
     def __init__(self, client):
         pass
-    
+
     def update(self):
         pass
 
@@ -140,6 +140,7 @@ class DisappearPowerup:
     def end(self):
         if not len([powerup for powerup in client.powerups if type(powerup) == DisappearPowerup]) > 1:
             Paddle.color = arcade.color.WHITE
+
 
 class GameView(arcade.View):
     """The game view."""
