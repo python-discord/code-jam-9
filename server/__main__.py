@@ -14,7 +14,7 @@ async def request_uname(ws) -> str:
     uname = json.loads(await ws.recv())["uname"]
     if uname in CONNECTIONS.data.keys():
         await ws.send('{"error": "username already used"}')
-        await request_uname(ws)
+        uname = await request_uname(ws)
     CONNECTIONS.add_user(uname, ws)
     return uname
 
@@ -25,7 +25,7 @@ async def request_user_limit(ws) -> None:
     ulimit = json.loads(await ws.recv())["ulimit"]
     if ulimit < 2 or ulimit % 1 != 0:
         await ws.send('{"error": "ulimit must be an integer greater than 1"}')
-        await request_user_limit(ws)
+        ulimit = await request_user_limit(ws)
     CONNECTIONS.user_limit = ulimit
 
 
@@ -54,8 +54,8 @@ async def connect(ws) -> None:
         CONNECTIONS.remove_user(uname)
 
 
-async def send_user_count_event() -> None:
-    """Sends user count events to all websockets."""
+async def send_event() -> None:
+    """Sends events to all websockets."""
     while True:
         user_count = CONNECTIONS.user_count
         if user_count != len(CONNECTIONS):
@@ -69,13 +69,21 @@ async def send_user_count_event() -> None:
                 f'{{"event": "{event_type}", "count": {user_count}, "uname_list": {current_users}}}',
             )
             CONNECTIONS.update_user_count()
+        elif user_count == CONNECTIONS.user_limit and not CONNECTIONS.game_started:
+            await list(CONNECTIONS.data.values())[0].send('{"event": "start_request"}')
+            start = bool(await list(CONNECTIONS.data.values())[0].recv())
+            if start:
+                websockets.broadcast(
+                    CONNECTIONS.data.values(), '{"event": "game_start"}'
+                )
+                CONNECTIONS.game_started = True
         await asyncio.sleep(1)
 
 
 async def main():
     """Runs the websockets server."""
     async with websockets.serve(connect, "localhost", 8081):
-        await send_user_count_event()
+        await send_event()
 
 
 if __name__ == "__main__":

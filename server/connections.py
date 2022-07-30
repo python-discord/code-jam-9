@@ -19,6 +19,7 @@ class Connections(Generic[T]):
         self.data = {} if data is None else data
         self._user_limit = user_limit
         self._user_count = 0
+        self.game_started = False
 
     def __len__(self) -> int:
         """Returns number of current users"""
