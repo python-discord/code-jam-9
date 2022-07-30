@@ -237,11 +237,11 @@ class Client(arcade.Window):
 
     def __init__(self, width: int = 700, height: int = 700, title: str = "Pong"):
         super().__init__(width, height, title)
-        self.player_number: int = None
+        self.player_number = None
         self.updates: dict = {}
         self.paddles: dict[int, Paddle] = {}
-        self.local_paddle: Paddle = None
-        self.ball: Ball = None
+        self.local_paddle: Paddle = None  # type: ignore
+        self.ball: Ball = None  # type: ignore
 
         self.start_event = threading.Event()
         self.stop_event = threading.Event()
@@ -288,7 +288,7 @@ class Client(arcade.Window):
 
     async def network_loop(self, ip: str):
         try:
-            async with websockets.connect(f'ws://{ip}:8765') as websocket:
+            async with websockets.connect(f'ws://{ip}:8765') as websocket:  # type: ignore
                 await websocket.send(json.dumps({'type': 'init'}))
                 while self.player_number is None:
                     message = json.loads(await websocket.recv())
@@ -318,7 +318,7 @@ class Client(arcade.Window):
                         # Convert keys back to ints because yes
                         updates['players'] = {int(k): v for k, v in updates['players'].items()}
                         self.updates = updates
-        except websockets.ConnectionClosed:
+        except websockets.ConnectionClosed:  # type: ignore
             self.stop_event.set()
 
 
