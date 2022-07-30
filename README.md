@@ -6,7 +6,7 @@
 2) How to start playing the game  
 
 ## How the game works  
-This game is a combination of pong and breakout. You can play with up to 3 other people. When you start the game you can choose which server you wish to join.  
+This game is a combination of pong and breakout. You can play with up to 3 other people. When you start the game you can choose which server by entering the ip of the server you wish to join.  
 
 https://user-images.githubusercontent.com/98356761/181430420-f69d182d-8ca3-4a58-a775-b9164a1193d0.mp4
 
