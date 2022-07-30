@@ -8,13 +8,14 @@
 
   <body class="App">
     <div class="App-container">
-      <div class="Game-container">
+      <div class="Code-container">
         <textarea class="Code-area" id="code-area" wrap="off">Code to Debug</textarea><br>
         <textarea class="Debug-area" id="debug-area" disabled="true">Debug Responses</textarea><br>
         <button class="Input-field" id="run-button" onclick={runCode()}>Run Code</button><br>
       </div>
       <div class="Setup-menu">
-        </div>
+        <textarea class="Question-area" id="question-area" disabled="true">Question</textarea><br>
+      </div>
       <div class="Player-data">
         <label for="input" id="input-label">Server Address:</label><br>
         <input class="Input-field" type="text" id="input" name="input" value="localhost:8081"><br>

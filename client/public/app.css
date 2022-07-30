@@ -12,7 +12,7 @@
 .Code-area {
   background-color: rgb(30, 30, 30);
   color: white;
-  width: 80%;
+  width: 90%;
   height: 65vh;
   border: none;
   resize: none;
@@ -22,15 +22,25 @@
 .Debug-area {
   background-color: rgb(30, 30, 30);
   color: white;
-  width: 80%;
+  width: 90%;
   height: 20vh;
   border: none;
   resize: none;
   font-size: 14px;
 }
 
-.Setup-menu {
+.Question-area {
+  background-color: rgb(30, 30, 30);
+  color: white;
+  width: 100%;
+  height: 10vh;
+  border: none;
+  resize: none;
+  font-size: 14px;
+  padding: 1vh;
+}
 
+.Setup-menu {
   width: 20vw;
 }
 
@@ -51,7 +61,7 @@
   color: red;
 }
 
-.Game-container {
+.Code-container {
   align-items: left;
   justify-content: left;
   width: 46vw;
