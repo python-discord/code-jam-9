@@ -36,25 +36,23 @@ class Server:
 
     def __init__(self, screen_size: tuple[int, int] = (700, 700), max_players: int = 4):
         """Initialize the player and ball data."""
-        self.last_client_bounced: Player = None  # The paddle that the ball last bounced off of
-        self.last_collided_side: int = 0
+        self.screen_size = screen_size
+        self.max_players = max_players
         self.active_clients: dict[int, Player] = {}
         self.client_websockets = []
-        # Ball variables
-        self.max_players = max_players
-        self.screen_size: tuple[int, int] = screen_size
         self.paddle_size: tuple[int, int] = (10, 100)
         self.ball_size: tuple[int, int] = (10, 10)
         self.ball_position_start: tuple[int, int] = (self.screen_size[0] // 2, self.screen_size[1] // 2)
         self.ball_position: tuple[int, int] = self.ball_position_start
-        self.ball_speed_start: tuple[int, int] = (5, 5)
+        self.ball_speed_start: tuple[int, int] = (8, 8)
         self.ball_speed: tuple[int, int] = self.ball_speed_start
         self.ball_bounced: bool = False
-        self.ball_last_side_bounced_off_of = None
+        self.last_client_bounced: Player = None  # type: ignore
+        self.last_collided_side: int = 0
 
     async def main(self):
         """Process a game loop tick."""
-        async with websockets.serve(self.handler, '0.0.0.0', 8765):
+        async with websockets.serve(self.handler, '0.0.0.0', 8765):  # type: ignore
             while True:
                 await self.game_update()
                 await self.broadcast_updates()
@@ -62,13 +60,13 @@ class Server:
 
     async def handler(self, websocket):
         """Handle websocket connections."""
-        try:
-            if len(self.active_clients) >= self.max_players:
-                await websocket.close(reason="Only four players at once.")
+        if len(self.active_clients) >= self.max_players:
+            await websocket.close(reason="Only four players at once.")
 
-            self.client_websockets.append(websocket)
-            player = Player(websocket.id, len(self.active_clients), websocket)
-            self.active_clients[player.player_number] = player
+        self.client_websockets.append(websocket)
+        player = Player(websocket.id, len(self.active_clients), websocket)
+        self.active_clients[player.player_number] = player
+        try:
             async for message in websocket:
                 event = json.loads(message)
                 if event['type'] == 'init':
@@ -76,10 +74,10 @@ class Server:
                         'type': 'join',
                         'data': {
                             'new': player.player_number,
-                            'ingame': list(self.active_clients.keys())
+                            'ingame': [k for k in self.active_clients.keys() if k != player.player_number],
                         }
                     }
-                    websockets.broadcast(
+                    websockets.broadcast(  # type: ignore
                         self.client_websockets,
                         json.dumps(data)
                     )
@@ -91,7 +89,7 @@ class Server:
             await websocket.close()
             self.client_websockets.remove(websocket)
             del self.active_clients[player.player_number]  # Clear client num
-            websockets.broadcast(
+            websockets.broadcast(  # type: ignore
                 self.client_websockets,
                 json.dumps({'type': 'leave', 'data': player.player_number})
             )
@@ -205,7 +203,7 @@ class Server:
                 'bounce': self.ball_bounced,
             }
         }
-        websockets.broadcast(self.client_websockets, json.dumps(updates))
+        websockets.broadcast(self.client_websockets, json.dumps(updates))  # type: ignore
 
 
 if __name__ == '__main__':
