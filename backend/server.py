@@ -191,7 +191,7 @@ class Server:
             if powerup.timer > 0:
                 powerups.append(powerup)
         self.powerups = powerups
-    
+
     async def broadcast_updates(self):
         """Broadcast updates to each connected client."""
         players = {player.player_number: player.to_dict() for player in self.active_clients.values()}
