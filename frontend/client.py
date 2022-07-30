@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import math
 import threading
 
 import arcade
@@ -13,6 +14,8 @@ import websockets
 
 class Paddle(arcade.Sprite):
     """The paddle sprite."""
+
+    color = arcade.color.WHITE
 
     def __init__(self, width: int = 10, height: int = 100, number: int = 0, direction: int = 1, local: bool = True):
         """Initialize a paddle sprite.
@@ -34,7 +37,6 @@ class Paddle(arcade.Sprite):
             self.direction = 0
         if self.direction == 0:
             self.width, self.height = self.height, self.width
-        self.color = arcade.color.WHITE
         if self.number == 0:
             self.center_x = 30
         elif self.number == 1:
@@ -64,6 +66,7 @@ class Paddle(arcade.Sprite):
             self.center_x, self.center_y = position
 
     def draw(self):
+        print(self.color)
         arcade.draw_rectangle_filled(self.center_x, self.center_y, self.width, self.height, self.color)
 
 
@@ -111,6 +114,33 @@ class Brick(arcade.Sprite):
         arcade.draw_rectangle_filled(self.center_x, self.center_y, self.width, self.height, self.color)
 
 
+class Powerup:
+
+    def __init__(self, client):
+        pass
+    
+    def update(self):
+        pass
+
+    def end(self):
+        pass
+
+
+class DisappearPowerup:
+
+    def __init__(self, client) -> None:
+        self.timer = 0
+        self.client = client
+
+    def update(self):
+        self.timer += 0.01
+        Paddle.color = (*arcade.color.WHITE, (abs(math.sin(self.timer))) * 255 * 0.05)
+        print(abs(math.sin(self.timer)))
+
+    def end(self):
+        if not len([powerup for powerup in client.powerups if type(powerup) == DisappearPowerup]) > 1:
+            Paddle.color = arcade.color.WHITE
+
 class GameView(arcade.View):
     """The game view."""
 
@@ -137,6 +167,8 @@ class GameView(arcade.View):
                 pass
         for index, brick in enumerate(self.client.bricks):
             brick.update(position=self.client.updates['bricks'][index]["position"])
+        for powerup in self.client.powerups:
+            powerup.update()
 
     def on_draw(self):
         self.clear()
@@ -264,6 +296,7 @@ class Client(arcade.Window):
         self.local_paddle: Paddle = None  # type: ignore
         self.ball: Ball = None  # type: ignore
         self.bricks: list[Brick] = []
+        self.powerups: list[Powerup] = []
 
         self.start_event = threading.Event()
         self.stop_event = threading.Event()
@@ -344,6 +377,13 @@ class Client(arcade.Window):
                             self.bricks = []
                             for brick in updates['bricks']:
                                 self.bricks.append(Brick(*brick['size']))
+                        if not len(updates['powerups']) == len(self.powerups):
+                            for powerup in self.powerups:
+                                powerup.end()
+                            self.powerups = []
+                            for powerup in updates['powerups']:
+                                if not powerup["user"] == self.local_paddle.number:
+                                    self.powerups.append(globals()[powerup["type"]]())
         except websockets.ConnectionClosed:  # type: ignore
             self.stop_event.set()
 

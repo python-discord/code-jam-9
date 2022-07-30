@@ -74,7 +74,7 @@ class Ball:
                     # self.server.add_score(brick.points)
                     collided_side = self.ball_last_side_bounced_off_of
                     print(collided_side, self.server.last_client_bounced)
-                    self.server.bricks.delete_brick(brick)
+                    self.server.bricks.delete_brick(brick, self.server.last_client_bounced)
 
         # Ball collision logic
         if collided_side is not None:

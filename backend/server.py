@@ -2,9 +2,11 @@
 
 import asyncio
 import json
+import random
 
 import websockets
 from ball import Ball
+
 
 x_pattern = [[.25, .5, 50, 10, 1], [.35, .5, 50, 10, 1], [.65, .5, 50, 10, 1], [.75, .5, 50, 10, 1],
              [.5, .25, 10, 50, 1], [.5, .35, 10, 50, 1], [.5, .65, 10, 50, 1], [.5, .75, 10, 50, 1],
@@ -40,14 +42,39 @@ class Player:
         return data
 
 
+class Powerup:
+
+    def __init__(self):
+        pass
+
+    def apply(self, server, player: Player, timer=5):
+        self.user = player 
+        self.timer = timer * 60
+        server.powerups.append(self)
+
+    def to_json(self):
+        return {"type": self.__class__.__name__, "user": self.user.player_number}
+
+
+class DisappearPowerup(Powerup):
+    pass
+
+
 class Brick:
+
+    powerups = [DisappearPowerup]
+    powerup_chance = 1
     def __init__(self, position_x: int, position_y: int, size: tuple = (10, 50), points: int = 1):
         self.size = size
         self.position = (position_x, position_y)
         self.points = points
 
+    def get_powerup(self):
+        if random.randint(1, self.powerup_chance) == 1:
+            return random.choice(self.powerups)()
 
 class Bricks:
+
     def __init__(self, screen_size, server_reference):
         self.screen_size = screen_size
         self.brick_list = []
@@ -62,12 +89,15 @@ class Bricks:
                                          p[4]
                                          ))
 
-    def delete_brick(self, brick):
+    def delete_brick(self, brick: Brick, player: Player):
+        powerup = brick.get_powerup()
+        if powerup is not None:
+            powerup.apply(self.server, player)
         self.brick_list.remove(brick)
 
     def to_json(self):
         data = []
-        for position, brick in enumerate(self.brick_list):
+        for brick in self.brick_list:
             data.append({"position": brick.position, "size": brick.size})
         return data
 
@@ -90,6 +120,7 @@ class Server:
         self.paddle_size = (10, 100)
         self.ball = Ball(self.screen_size, self)
         self.bricks = Bricks(self.screen_size, self)
+        self.powerups: list[Powerup] = []
         self.last_client_bounced: Player = None
 
     async def main(self):
@@ -146,7 +177,12 @@ class Server:
     async def game_update(self):
         if self.active_clients:
             await self.ball.update_ball_position()
-
+        powerups = []
+        for powerup in self.powerups:
+            powerup.timer -= 1
+            if powerup.timer > 0:
+                powerups.append(powerup)
+        self.powerups = powerups
     async def broadcast_updates(self):
         """Broadcast updates to each connected client."""
         players = {player.player_number: player.to_dict() for player in self.active_clients.values()}
@@ -157,6 +193,7 @@ class Server:
                 'bricks': self.bricks.to_json(),
                 'ball': self.ball.ball_position,
                 'bounce': self.ball.ball_bounced,
+                'powerups': [powerup.to_json() for powerup in self.powerups]
             }
         }
         websockets.broadcast(self.client_websockets, json.dumps(updates))  # type: ignore
