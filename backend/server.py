@@ -54,7 +54,8 @@ class Bricks:
         self.server = server_reference
 
     def generate_based_on_pattern(self):
-        pattern = x_pattern #todo add random choice patters and more patterns
+        # todo add random choice patters and more patterns
+        pattern = x_pattern
         for p in pattern:
             self.brick_list.append(Brick(self.screen_size[0]*p[0],
                                          self.screen_size[1]*p[1],
@@ -152,7 +153,6 @@ class Server:
     async def game_update(self):
         if self.active_clients:
             await self.ball.update_ball_position()
-
 
     async def broadcast_updates(self):
         """Broadcast updates to each connected client."""

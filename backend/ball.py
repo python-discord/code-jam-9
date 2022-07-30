@@ -1,4 +1,3 @@
-import math
 import random
 
 
@@ -96,7 +95,7 @@ class Ball:
             # print('new ball angle', self.ball_angle)
             self.total_bounces += 1
 
-        if self.total_bounces > random.randint(5-15) and self.total_bounces < 10000:
+        if random.randint(5 - 15) < self.total_bounces < 10000:
             self.server.bricks.generate_based_on_pattern()
             self.total_bounces = 10000
 
@@ -116,7 +115,6 @@ class Ball:
                 or self.ball_position[0] > 750 or self.ball_position[1] > 750):
             self.debug(collided_side)
             self.reset_ball()
-
 
     def debug(self, collided_side):
         print(self.ball_last_side_bounced_off_of)
