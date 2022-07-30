@@ -1,3 +1,4 @@
+import math
 import random
 
 
@@ -15,6 +16,7 @@ class Ball:
         self.ball_last_side_bounced_off_of = None
         self.paddle_bounce_counter = 0
         self.invulnerability = 15
+        self.total_bounces = 0
 
     async def update_ball_position(self):
         """Handle game calculations."""
@@ -92,6 +94,11 @@ class Ball:
                 self.ball_angle = (self.ball_angle[0], -self.ball_angle[1])
             self.invulnerability = 5
             # print('new ball angle', self.ball_angle)
+            self.total_bounces += 1
+
+        if self.total_bounces > random.randint(5-15) and self.total_bounces < 10000:
+            self.server.bricks.generate_based_on_pattern()
+            self.total_bounces = 10000
 
         else:
             self.ball_bounced = False
@@ -102,14 +109,14 @@ class Ball:
             self.ball_position[1] + self.ball_angle[1]
         )
         self.invulnerability -= 1
-        if self.invulnerability > 0:
-            print(self.invulnerability)
         if (self.ball_position[0] < 1 or self.ball_position[1] < 1
                 or self.ball_position[0] > 700 or self.ball_position[1] > 700):
             print(self.ball_position)
         if (self.ball_position[0] < -10 or self.ball_position[1] < -10
                 or self.ball_position[0] > 750 or self.ball_position[1] > 750):
             self.debug(collided_side)
+            self.reset_ball()
+
 
     def debug(self, collided_side):
         print(self.ball_last_side_bounced_off_of)
@@ -144,6 +151,9 @@ class Ball:
         """Reset the ball position."""
         self.ball_position = self.randomize_ball_start_position()
         self.ball_angle = self.randomize_ball_start_angle()
+        self.total_bounces = 0
+        self.server.bricks.empty_bricks()
+        self.server.last_client_bounced = None
 
     def check_ball_paddle_collision(self, object_pos, object_size, player_number=0):
         """Check if the ball is colliding with a paddle."""

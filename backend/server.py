@@ -51,10 +51,10 @@ class Bricks:
     def __init__(self, screen_size, server_reference):
         self.screen_size = screen_size
         self.brick_list = []
-        self.generate_based_on_pattern(x_pattern)
         self.server = server_reference
 
-    def generate_based_on_pattern(self, pattern):
+    def generate_based_on_pattern(self):
+        pattern = x_pattern #todo add random choice patters and more patterns
         for p in pattern:
             self.brick_list.append(Brick(self.screen_size[0]*p[0],
                                          self.screen_size[1]*p[1],
@@ -70,6 +70,9 @@ class Bricks:
         for position, brick in enumerate(self.brick_list):
             data.append({"position": brick.position, "size": brick.size})
         return data
+
+    def empty_bricks(self):
+        self.brick_list = []
 
         # data = [list(brick.position) for brick self.brick_list]
         # return data
@@ -138,6 +141,9 @@ class Server:
                 json.dumps({'type': 'leave', 'data': player.player_number})
             )
 
+    def add_to_total_bounces(self):
+        self.total_bounces += 1
+
     def add_score(self):
         """Update the score."""
         if self.last_client_bounced is not None:
@@ -146,6 +152,7 @@ class Server:
     async def game_update(self):
         if self.active_clients:
             await self.ball.update_ball_position()
+
 
     async def broadcast_updates(self):
         """Broadcast updates to each connected client."""
