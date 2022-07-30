@@ -4,8 +4,10 @@ import json
 import websockets
 
 from .connections import Connections
+from .questions import Questions
 
 CONNECTIONS = Connections()
+QUESTIONS = Questions()
 
 
 async def request_uname(ws) -> str:
