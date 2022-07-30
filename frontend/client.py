@@ -219,7 +219,8 @@ class Client:
             if key == self.player_number:
                 text += "You: {}".format(self.paddles[key].score)
             else:
-                text += 'Player {}: {}'.format(key, self.paddles[key].score)
+                text += 'Player {}: {}'.format(key+1, self.paddles[key].score)
+                
         return text
 
     def start_game(self):
