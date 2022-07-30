@@ -2,8 +2,6 @@
 
 import asyncio
 import json
-import random
-
 from ball import Ball
 import websockets
 
@@ -12,6 +10,7 @@ x_pattern = [[.25, .5, 50, 10, 1], [.35, .5, 50, 10, 1], [.65, .5, 50, 10, 1], [
              [.45, .5, 10, 50, 1], [.55, .5, 10, 50, 1],
              [.5, .45, 50, 10, 1], [.5, .55, 50, 10, 1]
              ]
+
 
 class Player:
     """Player data."""
@@ -41,7 +40,7 @@ class Player:
 
 
 class Brick:
-    def __init__(self, position_x: int, position_y: int, size: tuple = (10, 50), points:int = 1):
+    def __init__(self, position_x: int, position_y: int, size: tuple = (10, 50), points: int = 1):
         self.size = size
         self.position = (position_x, position_y)
         self.points = points
@@ -65,17 +64,14 @@ class Bricks:
     def delete_brick(self, brick):
         self.brick_list.remove(brick)
 
-
     def to_json(self):
         data = []
         for position, brick in enumerate(self.brick_list):
             data.append({"position": brick.position, "size": brick.size})
         return data
 
-
         # data = [list(brick.position) for brick self.brick_list]
         # return data
-
 
 
 class Server:
@@ -94,7 +90,6 @@ class Server:
         self.ball = Ball(self.screen_size, self)
         self.bricks = Bricks(self.screen_size, self)
         self.last_client_bounced: Player = None
-
 
     async def main(self):
         """Process a game loop tick."""
@@ -150,11 +145,6 @@ class Server:
     async def game_update(self):
         if self.active_clients:
             await self.ball.update_ball_position()
-
-    def add_score(self, points: int = 1):
-        """Update the score."""
-        if self.last_client_bounced is not None:
-            self.last_client_bounced.score += points
 
     async def broadcast_updates(self):
         """Broadcast updates to each connected client."""

@@ -1,8 +1,9 @@
 import random
 
+
 class Ball:
     def __init__(self, screen_size, server):
-        self.server: Server = server
+        self.server = server
         self.ball_size = (10, 10)
         self.paddle_size = (10, 100)
         self.ball_position_start: tuple[int, int] = self.randomize_ball_start_position()
@@ -14,7 +15,6 @@ class Ball:
         self.ball_last_side_bounced_off_of = None
         self.paddle_bounce_counter = 0
         self.invulnerability = 15
-
 
     async def update_ball_position(self):
         """Handle game calculations."""
@@ -62,7 +62,7 @@ class Ball:
         # Check if ball collides with a paddle
         if collided_side is None:
             for client in self.server.active_clients.values():
-                if self.check_ball_paddle_collision(client.paddle_position,self.paddle_size, client.player_number):
+                if self.check_ball_paddle_collision(client.paddle_position, self.paddle_size, client.player_number):
                     collided_side = client.player_number
                     self.server.last_client_bounced = client
                     self.paddle_bounce_counter += 1
@@ -93,7 +93,6 @@ class Ball:
             self.invulnerability = 5
             # print('new ball angle', self.ball_angle)
 
-
         else:
             self.ball_bounced = False
 
@@ -105,19 +104,17 @@ class Ball:
         self.invulnerability -= 1
         if self.invulnerability > 0:
             print(self.invulnerability)
-        if self.ball_position[0] < 1 or self.ball_position[1] < 1 or self.ball_position[0] > 700 or self.ball_position[1] > 700:
-                print(self.ball_position)
-        if self.ball_position[0] < -10 or self.ball_position[1] < -10 or self.ball_position[0] > 750 or self.ball_position[1] > 750:
+        if (self.ball_position[0] < 1 or self.ball_position[1] < 1
+                or self.ball_position[0] > 700 or self.ball_position[1] > 700):
+            print(self.ball_position)
+        if (self.ball_position[0] < -10 or self.ball_position[1] < -10
+                or self.ball_position[0] > 750 or self.ball_position[1] > 750):
             self.debug(collided_side)
 
-
-                # self.ball_speed = tuple([x+1 for x in list(self.ball_speed)])
-                # print(self.ball_speed, type(self.ball_speed))
     def debug(self, collided_side):
         print(self.ball_last_side_bounced_off_of)
         print(self.ball_position)
         print(collided_side)
-
 
     def collision_v2(self, collided_side: int, angle_adjustment: int):
         if collided_side == 0:
@@ -148,8 +145,7 @@ class Ball:
         self.ball_position = self.randomize_ball_start_position()
         self.ball_angle = self.randomize_ball_start_angle()
 
-
-    def check_ball_paddle_collision(self, object_pos, object_size, player_number = 0):
+    def check_ball_paddle_collision(self, object_pos, object_size, player_number=0):
         """Check if the ball is colliding with a paddle."""
         bx1 = self.ball_position[0] + self.ball_size[0] // 2
         by1 = self.ball_position[1] + self.ball_size[1] // 2
@@ -166,9 +162,8 @@ class Ball:
             px2 = object_pos[0] - object_size[0] // 2
             py2 = object_pos[1] - object_size[1] // 2
         return not (
-                bx1 < px2
-                or bx2 > px1
-                or by2 > py1
-                or by1 < py2
+            bx1 < px2
+            or bx2 > px1
+            or by2 > py1
+            or by1 < py2
         )
-

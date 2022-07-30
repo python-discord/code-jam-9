@@ -93,6 +93,7 @@ class Ball(arcade.Sprite):
     def draw(self):
         arcade.draw_rectangle_filled(self.center_x, self.center_y, self.width, self.height, self.color)
 
+
 class Brick(arcade.Sprite):
 
     def __init__(self, width: int = 10, height: int = 10):
@@ -102,12 +103,13 @@ class Brick(arcade.Sprite):
         self.width = width
         self.height = height
         self.color = arcade.color.WHITE
-    
+
     def update(self, position: tuple[int, int]):
         self.center_x, self.center_y = position
 
     def draw(self):
-        arcade.draw_rectangle_filled(self.center_x, self.center_y, self.width, self.height, self.color)    
+        arcade.draw_rectangle_filled(self.center_x, self.center_y, self.width, self.height, self.color)
+
 
 class GameView(arcade.View):
     """The game view."""
