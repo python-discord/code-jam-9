@@ -2,8 +2,14 @@
 
 import asyncio
 import json
-
+from ball import Ball
 import websockets
+
+x_pattern = [[.25, .5, 50, 10, 1], [.35, .5, 50, 10, 1], [.65, .5, 50, 10, 1], [.75, .5, 50, 10, 1],
+             [.5, .25, 10, 50, 1], [.5, .35, 10, 50, 1], [.5, .65, 10, 50, 1], [.5, .75, 10, 50, 1],
+             [.45, .5, 10, 50, 1], [.55, .5, 10, 50, 1],
+             [.5, .45, 50, 10, 1], [.5, .55, 50, 10, 1]
+             ]
 
 
 class Player:
@@ -16,6 +22,7 @@ class Player:
         self.player_number = player_number
         self.score = 0
         self.paddle_position = (0, 0)
+        self.paddle_size = (10, 100)
 
     def to_dict(self) -> dict:
         """Return a dict with the player data.
@@ -26,9 +33,45 @@ class Player:
         data = {
             'position': self.paddle_position,
             'score': self.score,
-            'player_number': self.player_number
+            'player_number': self.player_number,
+            'paddle_size': self.paddle_size
         }
         return data
+
+
+class Brick:
+    def __init__(self, position_x: int, position_y: int, size: tuple = (10, 50), points: int = 1):
+        self.size = size
+        self.position = (position_x, position_y)
+        self.points = points
+
+
+class Bricks:
+    def __init__(self, screen_size, server_reference):
+        self.screen_size = screen_size
+        self.brick_list = []
+        self.generate_based_on_pattern(x_pattern)
+        self.server = server_reference
+
+    def generate_based_on_pattern(self, pattern):
+        for p in pattern:
+            self.brick_list.append(Brick(self.screen_size[0]*p[0],
+                                         self.screen_size[1]*p[1],
+                                         (p[2], p[3]),
+                                         p[4]
+                                         ))
+
+    def delete_brick(self, brick):
+        self.brick_list.remove(brick)
+
+    def to_json(self):
+        data = []
+        for position, brick in enumerate(self.brick_list):
+            data.append({"position": brick.position, "size": brick.size})
+        return data
+
+        # data = [list(brick.position) for brick self.brick_list]
+        # return data
 
 
 class Server:
@@ -40,15 +83,13 @@ class Server:
         self.max_players = max_players
         self.active_clients: dict[int, Player] = {}
         self.client_websockets = []
-        self.paddle_size: tuple[int, int] = (10, 100)
-        self.ball_size: tuple[int, int] = (10, 10)
-        self.ball_position_start: tuple[int, int] = (self.screen_size[0] // 2, self.screen_size[1] // 2)
-        self.ball_position: tuple[int, int] = self.ball_position_start
-        self.ball_speed_start: tuple[int, int] = (8, 8)
-        self.ball_speed: tuple[int, int] = self.ball_speed_start
-        self.ball_bounced: bool = False
-        self.last_client_bounced: Player = None  # type: ignore
-        self.last_collided_side: int = 0
+        # Ball variables
+        self.max_players = 4
+        self.screen_size = (700, 700)
+        self.paddle_size = (10, 100)
+        self.ball = Ball(self.screen_size, self)
+        self.bricks = Bricks(self.screen_size, self)
+        self.last_client_bounced: Player = None
 
     async def main(self):
         """Process a game loop tick."""
@@ -84,6 +125,8 @@ class Server:
                 elif event['type'] == 'paddle':
                     # Paddle position update
                     player.paddle_position = event['data']
+        except Exception as e:
+            print(e)
         finally:
             # Clean up the connection
             await websocket.close()
@@ -94,103 +137,14 @@ class Server:
                 json.dumps({'type': 'leave', 'data': player.player_number})
             )
 
-    def reset_ball(self):
-        """Reset the ball position."""
-        self.ball_position = self.ball_position_start
-        self.ball_speed = self.ball_speed_start
-
     def add_score(self):
         """Update the score."""
         if self.last_client_bounced is not None:
             self.last_client_bounced.score += 1
 
     async def game_update(self):
-        """Handle game calculations."""
-        collided_side = None
-        ball_x = self.ball_position[0]
-        ball_y = self.ball_position[1]
-
-        # Check if ball collides with a wall
-        if ball_x <= 0 and self.last_collided_side != 0:
-            if self.active_clients.get(0) is not None:
-                self.add_score()
-                self.reset_ball()
-            else:
-                collided_side = 0
-
-        if ball_x >= self.screen_size[0] and self.last_collided_side != 1:
-            if self.active_clients.get(1) is not None:
-                self.add_score()
-                self.reset_ball()
-            else:
-                collided_side = 1
-
-        if ball_y <= 0 and self.last_collided_side != 2:
-            if self.active_clients.get(2) is not None:
-                self.add_score()
-                self.reset_ball()
-            else:
-                collided_side = 2
-
-        if ball_y >= self.screen_size[1] and self.last_collided_side != 3:
-            if self.active_clients.get(3) is not None:
-                self.add_score()
-                self.reset_ball()
-            else:
-                collided_side = 3
-
-        # Check if ball collides with a paddle
-        if collided_side is None:
-            for client in self.active_clients.values():
-                if self.check_ball_paddle_collision(client.paddle_position, client.player_number):
-                    collided_side = client.player_number
-                    self.last_client_bounced = client
-                    break
-
-        # Ball collision logic
-        if collided_side is not None:
-            self.ball_bounced = True
-            self.last_collided_side = collided_side
-            # Calculate new ball speed
-            if collided_side == 0:
-                self.ball_speed = (-self.ball_speed[0], self.ball_speed[1])
-            if collided_side == 1:
-                self.ball_speed = (-self.ball_speed[0], self.ball_speed[1])
-            if collided_side == 2:
-                self.ball_speed = (self.ball_speed[0], -self.ball_speed[1])
-            if collided_side == 3:
-                self.ball_speed = (self.ball_speed[0], -self.ball_speed[1])
-        else:
-            self.ball_bounced = False
-
-        # Update the ball position
-        self.ball_position = (
-            self.ball_position[0] + self.ball_speed[0],
-            self.ball_position[1] + self.ball_speed[1]
-        )
-
-    def check_ball_paddle_collision(self, paddle_pos: tuple[int, int], player_number: int) -> bool:
-        """Check if the ball is colliding with a paddle."""
-        bx1 = self.ball_position[0] + self.ball_size[0] // 2
-        by1 = self.ball_position[1] + self.ball_size[1] // 2
-        bx2 = self.ball_position[0] - self.ball_size[0] // 2
-        by2 = self.ball_position[1] - self.ball_size[1] // 2
-        if player_number >= 2:
-            px1 = paddle_pos[0] + self.paddle_size[1] // 2
-            py1 = paddle_pos[1] + self.paddle_size[0] // 2
-            px2 = paddle_pos[0] - self.paddle_size[1] // 2
-            py2 = paddle_pos[1] - self.paddle_size[0] // 2
-        else:
-            px1 = paddle_pos[0] + self.paddle_size[0] // 2
-            py1 = paddle_pos[1] + self.paddle_size[1] // 2
-            px2 = paddle_pos[0] - self.paddle_size[0] // 2
-            py2 = paddle_pos[1] - self.paddle_size[1] // 2
-        return not (
-            bx1 < px2
-            or bx2 > px1
-            or by2 > py1
-            or by1 < py2
-        )
+        if self.active_clients:
+            await self.ball.update_ball_position()
 
     async def broadcast_updates(self):
         """Broadcast updates to each connected client."""
@@ -199,8 +153,9 @@ class Server:
             'type': 'updates',
             'data': {
                 'players': players,
-                'ball': self.ball_position,
-                'bounce': self.ball_bounced,
+                'bricks': self.bricks.to_json(),
+                'ball': self.ball.ball_position,
+                'bounce': self.ball.ball_bounced,
             }
         }
         websockets.broadcast(self.client_websockets, json.dumps(updates))  # type: ignore

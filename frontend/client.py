@@ -94,6 +94,23 @@ class Ball(arcade.Sprite):
         arcade.draw_rectangle_filled(self.center_x, self.center_y, self.width, self.height, self.color)
 
 
+class Brick(arcade.Sprite):
+
+    def __init__(self, width: int = 10, height: int = 10):
+        """The Brick sprite."""
+
+        super().__init__()
+        self.width = width
+        self.height = height
+        self.color = arcade.color.WHITE
+
+    def update(self, position: tuple[int, int]):
+        self.center_x, self.center_y = position
+
+    def draw(self):
+        arcade.draw_rectangle_filled(self.center_x, self.center_y, self.width, self.height, self.color)
+
+
 class GameView(arcade.View):
     """The game view."""
 
@@ -118,6 +135,8 @@ class GameView(arcade.View):
                 paddle.update(position=self.client.updates['players'][number]['position'])
             except KeyError:  # When updates variable hasn't been updated yet
                 pass
+        for index, brick in enumerate(self.client.bricks):
+            brick.update(position=self.client.updates['bricks'][index]["position"])
 
     def on_draw(self):
         self.clear()
@@ -127,6 +146,8 @@ class GameView(arcade.View):
             if paddle.number == self.client.player_number:  # Remove after updating server deployment
                 continue
             paddle.draw()
+        for brick in self.client.bricks:
+            brick.draw()
 
     def on_mouse_motion(self, x, y, dx, dy):
         if self.client.local_paddle:
@@ -151,7 +172,7 @@ class MainMenuView(arcade.View):
         v_box.add(ip_title)
 
         ip_input = arcade.gui.UIInputText(
-            text="zesty-zombies.pshome.me",
+            text="0.0.0.0",
             width=200,
             text_color=arcade.color.WHITE
         )
@@ -242,6 +263,7 @@ class Client(arcade.Window):
         self.paddles: dict[int, Paddle] = {}
         self.local_paddle: Paddle = None  # type: ignore
         self.ball: Ball = None  # type: ignore
+        self.bricks: list[Brick] = []
 
         self.start_event = threading.Event()
         self.stop_event = threading.Event()
@@ -318,6 +340,10 @@ class Client(arcade.Window):
                         # Convert keys back to ints because yes
                         updates['players'] = {int(k): v for k, v in updates['players'].items()}
                         self.updates = updates
+                        if not len(updates['bricks']) == len(self.bricks):
+                            self.bricks = []
+                            for brick in updates['bricks']:
+                                self.bricks.append(Brick(*brick['size']))
         except websockets.ConnectionClosed:  # type: ignore
             self.stop_event.set()
 
