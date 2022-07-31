@@ -10,9 +10,9 @@ CONNECTIONS = Connections()
 QUESTIONS = Questions()
 
 
-def update_scores(scores: dict, answers: dict, correct: int):
+def update_scores(scores: dict, answers: dict, correct: int) -> None:
     """
-    Update scores dict
+    Updates scores dict
 
     Updates a dict of player scores in place, awarding one point
     for correct answers and zero for incorrect
@@ -107,7 +107,7 @@ async def send_question(question) -> None | int:
         return answer
 
 
-async def collect_answers():
+async def collect_answers() -> None | dict:
     """Gathers player answers to most recently asked question"""
     if CONNECTIONS.game_started:
         return {uname: await conn.recv() for uname, conn in CONNECTIONS.data.values()}
@@ -119,7 +119,7 @@ async def collect_answers():
 # question_choices[uname] = await conn.recv()
 
 
-async def main():
+async def main() -> None:
     """Runs the websockets server."""
     async with websockets.serve(connect, "localhost", 8081):
         while True:

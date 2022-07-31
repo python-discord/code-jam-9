@@ -1,7 +1,6 @@
 {
     "questions": [
         {
-            "question_type": "multiple_choice",
             "traceback": "SyntaxError: unterminated string literal (detected at line 1)",
             "code": "print('a\")",
             "question": "Which line of code would fix this error?",
@@ -14,20 +13,6 @@
             "correct_answer": 2
         },
         {
-            "question_type": "user_input",
-            "traceback": "SyntaxError: invalid syntax",
-            "code": "a = new int(2)",
-            "question": "Fix the given line of code.",
-            "answers": [
-                "a = int(2)",
-                "a=int(2)",
-                "a = 2",
-                "a=2"
-            ]
-        },
-        {
-
-            "question_type": "multiple_choice",
             "traceback": "TypeError: unsupported operand type(s) for +: 'int' and 'str'",
             "code": "x =4\ny = \"a\"\nx + y",
             "question": "Which line of code would result in the string \"4a\"?",
@@ -40,8 +25,6 @@
             "correct_answer": 0
         },
         {
-
-            "question_type": "multiple_choice",
             "traceback": "ValueError: min() arg is an empty sequence",
             "code": "x = y = [2] * 2\na = min(x)\nx.pop()\nx.pop()\na == min(y)",
             "question": "What change to the first line would make the last line evaluate to True?",
@@ -54,8 +37,6 @@
             "correct_answer": 2
         },
         {
-
-            "question_type": "multiple_choice",
             "traceback": "TypeError: unhashable type: 'list'",
             "code": "x = [1, 2]\n{x : 1}",
             "question": "What change, inserted after the first line, would cause this snippet to run without an error?",
@@ -68,8 +49,6 @@
             "correct_answer": 3
         },
         {
-
-            "question_type": "multiple_choice",
             "traceback": "ValueError: min() arg is an empty sequence",
             "code": "x = ([1], [2])\ny = x\nx[0].pop()\nmin(y[0])",
             "question": "What change, inserted after the first line, would cause the last line to evaluate to 1?",
@@ -82,8 +61,6 @@
             "correct_answer": 1
         },
         {
-
-            "question_type": "multiple_choice",
             "traceback": "'str' object does not support item assignment",
             "code": "x=\"a1\"\nx[-1]=\"2\"",
             "question": "Which line of code, replaced with the last line, would evaluate to \"a1\"?",
@@ -97,7 +74,6 @@
         },
         {
 
-            "question_type": "multiple_choice",
             "traceback": "AttributeError: 'list' object has no attribute 'add'",
             "code": "x = [1, 2, 3]\ny = [4, 5]\nx.add(y)",
             "question": "Which line of code would concatenate x and y?",
