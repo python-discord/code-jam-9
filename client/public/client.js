@@ -133,7 +133,5 @@ function gameSetup() {
 
 }
 
-
-function runCode() {
-  // TODO: send code to server
+function processAnswer(answer) {
 }

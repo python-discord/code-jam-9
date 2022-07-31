@@ -104,7 +104,7 @@ async def send_question(question) -> None | int:
         send_question = question.copy()
         answer = send_question.pop("correct_answer")
         send_question = json.dumps(send_question)
-        websockets.broadcast(CONNECTIONS.data.values(), send_question)
+        websockets.broadcast(CONNECTIONS.data.values(), '{"event": "question", "question": ' + send_question + '}')
         return answer
 
 
@@ -136,21 +136,21 @@ async def main() -> None:
                 answers = await collect_answers()
                 await asyncio.sleep(1)
                 update_scores(scores, answers, correct)
-                websockets.broadcast(conns, "Latest scores: ")
-                websockets.broadcast(conns, json.dumps(scores))
+                websockets.broadcast(conns, '{"event": "score_update", "scores": ' + json.dumps(scores) + '}')
 
             # Sort scores in descending order
             scores = {
                 uname: score
                 for uname, score in sorted(scores.items(), key=lambda item: -item[1])
             }
-            websockets.broadcast(conns, "Final scores: ")
-            websockets.broadcast(conns, json.dumps(scores))
             # Since the first element has the highest score
             # winner = next(iter(scores.keys()))
             winner = "Frodo"
             # TODO tiebreaker method of closest to selected random number
-            websockets.broadcast(conns, f"The winner is {winner}!")
+            websockets.broadcast(
+                conns,
+                '{"event": "game_over", "winner": "' + winner + '", "scores": ' + json.dumps(scores) + '}'
+            )
 
 
 if __name__ == "__main__":
