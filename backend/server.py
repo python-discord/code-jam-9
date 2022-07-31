@@ -67,7 +67,11 @@ class Powerup:
         return {"type": self.__class__.__name__, "user": self.user.player_number}
 
 
-class DisappearPowerup(Powerup):
+class PaddleDisappearPowerup(Powerup):
+    pass
+
+
+class BallDisappearPowerup(Powerup):
     pass
 
 
@@ -77,7 +81,7 @@ class InversePowerup(Powerup):
 
 class Brick:
 
-    powerups = [DisappearPowerup, InversePowerup]
+    powerups = [PaddleDisappearPowerup, BallDisappearPowerup, InversePowerup]
     powerup_chance = 5
 
     def __init__(self, position_x: int, position_y: int, size: tuple = (10, 50), points: int = 1):
@@ -218,6 +222,7 @@ class Server:
                 'players': players,
                 'bricks': self.bricks.to_json(),
                 'ball': self.ball.ball_position,
+                'ball_texture': self.ball.texture,
                 'bounce': self.ball.ball_bounced,
                 'powerups': [powerup.to_json() for powerup in self.powerups]
             }
