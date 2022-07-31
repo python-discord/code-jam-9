@@ -98,10 +98,10 @@ function connectToServer() {
         document.getElementById('2').innerHTML = message.possible_answers[2];
         document.getElementById('3').innerHTML = message.possible_answers[3];
 
-        document.getElementById('0').innerHTML = message.possible_answers[0];
-        document.getElementById('1').innerHTML = message.possible_answers[1];
-        document.getElementById('2').innerHTML = message.possible_answers[2];
-        document.getElementById('3').innerHTML = message.possible_answers[3];
+        document.getElementById('0').disabled = false;
+        document.getElementById('1').disabled = false;
+        document.getElementById('2').disabled = false;
+        document.getElementById('3').disabled = false;
     }
 
     else if (message.event == "score_update"){
@@ -180,6 +180,11 @@ function sendStartRequest() {
 
 function processAnswer(answer) {
   console.log("Sending Answer To Server");
+
+  document.getElementById('0').disabled = true;
+  document.getElementById('1').disabled = true;
+  document.getElementById('2').disabled = true;
+  document.getElementById('3').disabled = true;
 
   // Uncomment the below line if you would rather send the answer as the text, not a number
   // answer = document.getElementById(answer).innerHTML;
