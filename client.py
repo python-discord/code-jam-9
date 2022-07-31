@@ -186,7 +186,7 @@ class InvisibleBallPowerup(Powerup):
 
     def update(self):
         self.timer += 0.01
-        self.client.ball.alpha = int((abs(math.sin(self.timer))) * 255 * 0.05)
+        self.client.ball.alpha = int((abs(math.sin(self.timer))) * 255 * 0.1)
 
     def end(self):
         if len([powerup for powerup in client.powerups if isinstance(powerup, InvisibleBallPowerup)]) <= 1:
