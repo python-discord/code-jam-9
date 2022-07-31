@@ -114,10 +114,8 @@ class Paddle(arcade.Sprite):
 
 class Ball(arcade.Sprite):
     """The ball sprite."""
-
-    color = arcade.color.WHITE
-
-    def __init__(self, width: int = 10, height: int = 10):
+    
+    def __init__(self):
         """Initialize a ball sprite.
 
         Args:
@@ -125,8 +123,10 @@ class Ball(arcade.Sprite):
             height (int, optional): The height of the ball sprite. Defaults to 10.
         """
         super().__init__()
-        self.width = width
-        self.height = height
+        self.color = arcade.color.WHITE
+        self.bug = arcade.load_texture('images/bug.png')
+        self.dvd = arcade.load_texture('images/dvd.png')
+        self.ball_texture = 0
 
     def update(self, position: tuple[int, int]):
         """Update the ball location.
@@ -137,7 +137,10 @@ class Ball(arcade.Sprite):
         self.center_x, self.center_y = position
 
     def draw(self):
-        arcade.draw_rectangle_filled(self.center_x, self.center_y, self.width, self.height, self.color)
+        if self.ball_texture == 0:
+            self.bug.draw_scaled(self.center_x, self.center_y, scale=2)
+        else:
+            self.dvd.draw_scaled(self.center_x, self.center_y, scale=2)
 
 
 class Brick(arcade.Sprite):
@@ -461,9 +464,9 @@ class Client(arcade.Window):
         text = ''
         for key in self.updates['players']:
             if self.updates['players'][key]['player_number'] == self.player_number:
-                text += "You: {}".format(self.updates['players'][key]['score'])
+                text += "You: {} ".format(self.updates['players'][key]['score'])
             else:
-                text += 'Player {}: {}'.format(
+                text += 'Player {}: {} '.format(
                     self.updates['players'][key]['player_number']+1,
                     self.updates['players'][key]['score'])
         return text
@@ -502,6 +505,8 @@ class Client(arcade.Window):
                         # Convert keys back to ints because yes
                         updates['players'] = {int(k): v for k, v in updates['players'].items()}
                         self.updates = updates
+                        print(self.updates)
+                        self.ball.ball_texture = self.updates['ball_texture']
                         self.scores_text = self.get_score_text()
                         if not len(updates['bricks']) == len(self.bricks):
                             self.bricks = []
