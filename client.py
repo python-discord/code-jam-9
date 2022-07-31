@@ -196,7 +196,7 @@ class InvisibleBallPowerup(Powerup):
         return 'an invisible ball powerup'
 
 
-class InvertedPaddlePowerup(Powerup):
+class InversePowerup(Powerup):
     def __init__(self, client):
         self.timer = 0
         self.client = client
@@ -209,6 +209,7 @@ class InvertedPaddlePowerup(Powerup):
     @staticmethod
     def to_string():
         return 'an inverted paddle movement powerup'
+
 
 
 class GameView(arcade.View):
