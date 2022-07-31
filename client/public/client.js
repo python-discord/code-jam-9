@@ -89,14 +89,17 @@ function connectToServer() {
     }
 
     else if (message.event == "question"){
-        document.getElementById('question-area').innerHTML = message.question;
-        document.getElementById('traceback').innerHTML = message.traceback;
-        document.getElementById('code-area').innerHTML = message.code;
+        let content = message.question
+        console.log(content)
 
-        document.getElementById('0').innerHTML = message.possible_answers[0];
-        document.getElementById('1').innerHTML = message.possible_answers[1];
-        document.getElementById('2').innerHTML = message.possible_answers[2];
-        document.getElementById('3').innerHTML = message.possible_answers[3];
+        document.getElementById('question-area').innerHTML = content.question;
+        document.getElementById('traceback').innerHTML = content.traceback;
+        document.getElementById('code-area').innerHTML = content.code;
+
+        document.getElementById('0').innerHTML = content.possible_answers[0];
+        document.getElementById('1').innerHTML = content.possible_answers[1];
+        document.getElementById('2').innerHTML = content.possible_answers[2];
+        document.getElementById('3').innerHTML = content.possible_answers[3];
 
         document.getElementById('0').disabled = false;
         document.getElementById('1').disabled = false;
@@ -167,7 +170,7 @@ function sendULimit() {
 function updatePlayerData() {
   document.getElementById('player-count').innerHTML = `${onlineCount}<br>`;
   let playerListHtml = uname_list.map((player) => {
-    return `<li>${player} - ${scores.player}</li>`;
+    return `<li>${player} - ${scores[player]}</li>`;
   }).join('')
   console.log(playerListHtml);
   document.getElementById('player-list').innerHTML = playerListHtml;
@@ -179,17 +182,13 @@ function sendStartRequest() {
 }
 
 function processAnswer(answer) {
-  console.log("Sending Answer To Server");
+  console.log(`Sending Answer To Server: ${answer}`);
 
   document.getElementById('0').disabled = true;
   document.getElementById('1').disabled = true;
   document.getElementById('2').disabled = true;
   document.getElementById('3').disabled = true;
 
-  // Uncomment the below line if you would rather send the answer as the text, not a number
-  // answer = document.getElementById(answer).innerHTML;
-
-  // Modify this send if this is not the desired behavior
   socket.send(JSON.stringify({
     "answer": answer
   }));

@@ -124,7 +124,7 @@ async def collect_answers() -> None | dict:
         for conn in CONNECTIONS.data.values():
             index = list(CONNECTIONS.data.values()).index(conn)
             uname = list(CONNECTIONS.data.keys())[index]
-            answers[uname] = await conn.recv()
+            answers[uname] = json.loads(await conn.recv())["answer"]
         return answers
 
 
@@ -148,29 +148,29 @@ async def main() -> None:
             conns = CONNECTIONS.data.values()
             # Iterate sending a question, collecting answers, and checking them
             for question in QUESTIONS.questions:
+                websockets.broadcast(
+                    conns,
+                    '{"event": "score_update", "scores": ' + json.dumps(scores) + "}",
+                )
                 correct = await send_question(question)
                 if correct is None:
                     break
                 answers = await collect_answers()
                 await asyncio.sleep(1)
                 update_scores(scores, answers, correct)
-                websockets.broadcast(
-                    conns,
-                    '{"event": "score_update", "scores": ' + json.dumps(scores) + "}",
-                )
 
-            # Sort scores in descending order
-            scores = {
-                uname: score
-                for uname, score in sorted(scores.items(), key=lambda item: -item[1])
-            }
             if not CONNECTIONS.game_started:
                 await asyncio.sleep(1)
                 continue
-            # Since the first element has the highest score
-            # winner = next(iter(scores.keys()))
-            winner = "Frodo"
-            # TODO tiebreaker method of closest to selected random number
+
+            topScore = max(scores.values())
+            winner = ""
+            for uname, score in scores.items():
+                if score == topScore and winner == "":
+                    winner = uname
+                elif score == topScore and winner != "":
+                    winner = "Tie"
+
             websockets.broadcast(
                 conns,
                 '{"event": "game_over", "winner": "'
@@ -179,6 +179,7 @@ async def main() -> None:
                 + json.dumps(scores)
                 + "}",
             )
+            await asyncio.sleep(10)
 
 
 if __name__ == "__main__":

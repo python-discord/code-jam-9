@@ -77,7 +77,7 @@
             "traceback": "AttributeError: 'list' object has no attribute 'add'",
             "code": "x = [1, 2, 3]\ny = [4, 5]\nx.add(y)",
             "question": "Which line of code would concatenate x and y?",
-            "answers": [
+            "possible_answers": [
                 "x.append(y)",
                 "x[:] = y",
                 "x = list(x, y)",
