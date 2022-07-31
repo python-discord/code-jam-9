@@ -433,9 +433,9 @@ class Client(arcade.Window):
         text = ''
         for key in self.updates['players']:
             if self.updates['players'][key]['player_number'] == self.player_number:
-                text += "You: {}".format(self.updates['players'][key]['score'])
+                text += "You: {} ".format(self.updates['players'][key]['score'])
             else:
-                text += 'Player {}: {}'.format(
+                text += 'Player {}: {} '.format(
                     self.updates['players'][key]['player_number']+1,
                     self.updates['players'][key]['score'])
         return text
