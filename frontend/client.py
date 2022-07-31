@@ -140,7 +140,7 @@ class Ball(arcade.Sprite):
         if self.ball_texture == 0:
             self.bug.draw_scaled(self.center_x, self.center_y, scale=2)
         else:
-            self.dvd.draw_scaled(self.center_x, self.center_y)
+            self.dvd.draw_scaled(self.center_x, self.center_y, scale=2)
 
 
 class Brick(arcade.Sprite):
@@ -476,6 +476,7 @@ class Client(arcade.Window):
                         updates['players'] = {int(k): v for k, v in updates['players'].items()}
                         self.updates = updates
                         print(self.updates)
+                        self.ball.ball_texture = self.updates['ball_texture']
                         self.scores_text = self.get_score_text()
                         if not len(updates['bricks']) == len(self.bricks):
                             self.bricks = []
