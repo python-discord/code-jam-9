@@ -18,22 +18,14 @@ from arcade.experimental.texture_render_target import RenderTargetTexture
 class ChromaticAberration(RenderTargetTexture):
     def __init__(self, width, height):
         super().__init__(width, height)
-        with open(os.path.dirname(os.path.realpath(__file__)) + "/shader.glsl") as file:
-            self.program = self.ctx.program(
-                vertex_shader="""
-                #version 330
-
-                in vec2 in_vert;
-                in vec2 in_uv;
-                out vec2 uv;
-
-                void main() {
-                    gl_Position = vec4(in_vert, 0.0, 1.0);
-                    uv = in_uv;
-                }
-                """,
-                fragment_shader=file.read()
-            )
+        with open('assets/shaders/fragment.glsl') as file:
+            fragment_shader = file.read()
+        with open('assets/shaders/vertex.glsl') as file:
+            vertex_shader = file.read()
+        self.program = self.ctx.program(
+            fragment_shader=fragment_shader,
+            vertex_shader=vertex_shader,
+        )
         self.program["resolution"] = (width, height)
 
     def use(self):
