@@ -93,25 +93,15 @@ class Paddle(arcade.Sprite):
             mouse_pos = position[self.direction]
             if self.direction == 0:
                 if self.inverse:
-<<<<<<< HEAD
                     self.center_x = abs(SCREEN_WIDTH - self.clamp(mouse_pos, self.width / 2,
                                         SCREEN_WIDTH - self.width / 2))
-=======
-                    self.center_x = abs(SCREEN_WIDTH - self.clamp(
-                        mouse_pos, self.width / 2, SCREEN_WIDTH - self.width / 2))
->>>>>>> refs/remotes/origin/main
                 else:
                     self.center_x = self.clamp(
                         mouse_pos, self.width / 2, SCREEN_WIDTH - self.width / 2)
             else:
                 if self.inverse:
-<<<<<<< HEAD
                     self.center_y = abs(SCREEN_HEIGHT - self.clamp(mouse_pos, self.height / 2,
                                         SCREEN_HEIGHT - self.height / 2))
-=======
-                    self.center_y = abs(SCREEN_HEIGHT - self.clamp(
-                        mouse_pos, self.height / 2, SCREEN_HEIGHT - self.height / 2))
->>>>>>> refs/remotes/origin/main
                 else:
                     self.center_y = self.clamp(
                         mouse_pos, self.height / 2, SCREEN_HEIGHT - self.height / 2)
