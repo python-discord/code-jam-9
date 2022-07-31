@@ -116,7 +116,7 @@ class Paddle(arcade.Sprite):
 class Ball(arcade.Sprite):
     """The ball sprite."""
 
-    def __init__(self, width: int = 10, height: int = 10, radius: int = 10):
+    def __init__(self):
         """Initialize a ball sprite.
 
         Args:
@@ -124,9 +124,6 @@ class Ball(arcade.Sprite):
             height (int, optional): The height of the ball sprite. Defaults to 10.
         """
         super().__init__()
-        self.width = width
-        self.height = height
-        self.radius = radius
         self.color = arcade.color.WHITE
         self.bug = arcade.load_texture('images/bug.png')
 
