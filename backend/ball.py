@@ -26,7 +26,7 @@ class Ball:
 
         # Check if ball collides with a wall
         if ball_x <= 0 and self.invulnerability <= 0:
-            print('wall bounce 0', ball_x, ball_y, self.invulnerability)
+            # print('wall bounce 0', ball_x, ball_y, self.invulnerability)
             if self.server.active_clients.get(0) is not None:
                 self.server.add_score(0)
                 self.reset_ball()
@@ -35,7 +35,7 @@ class Ball:
                 self.ball_last_side_bounced_off_of = 0
 
         if ball_x >= self.server.screen_size[0] and self.invulnerability <= 0:
-            print('wall bounce 1', ball_x, ball_y, self.invulnerability)
+            # print('wall bounce 1', ball_x, ball_y, self.invulnerability)
             if self.server.active_clients.get(1) is not None:
                 self.server.add_score(1)
                 self.reset_ball()
@@ -44,7 +44,7 @@ class Ball:
                 self.ball_last_side_bounced_off_of = 1
 
         if ball_y <= 0 and self.invulnerability <= 0:
-            print('wall bounce 2', ball_x, ball_y, self.invulnerability)
+            # print('wall bounce 2', ball_x, ball_y, self.invulnerability)
             if self.server.active_clients.get(2) is not None:
                 self.server.add_score(2)
                 self.reset_ball()
@@ -53,7 +53,7 @@ class Ball:
                 self.ball_last_side_bounced_off_of = 2
 
         if ball_y >= self.server.screen_size[1] and self.invulnerability <= 0:
-            print('wall bounce 3', ball_x, ball_y, self.invulnerability)
+            # print('wall bounce 3', ball_x, ball_y, self.invulnerability)
             if self.server.active_clients.get(3) is not None:
                 self.server.add_score(3)
                 self.reset_ball()
@@ -72,7 +72,7 @@ class Ball:
             for brick in self.server.bricks.brick_list:
                 if self.check_ball_paddle_collision(brick.position, brick.size) \
                         and self.server.last_client_bounced is not None:
-                    print('hit a brick')
+                    # print('hit a brick')
                     # self.server.add_score(brick.points)
                     collided_side = self.ball_last_side_bounced_off_of
                     self.server.bricks.delete_brick(brick, self.server.last_client_bounced)
@@ -107,19 +107,11 @@ class Ball:
             self.ball_position[1] + self.ball_angle[1]
         )
         self.invulnerability -= 1
-        if (self.ball_position[0] < 1 or self.ball_position[1] < 1
-                or self.ball_position[0] > 700 or self.ball_position[1] > 700):
-            print(self.ball_position)
+
         if (self.ball_position[0] < -10 or self.ball_position[1] < -10
                 or self.ball_position[0] > 750 or self.ball_position[1] > 750):
-            self.debug(collided_side)
             self.reset_ball()
             self.texture = 1
-
-    def debug(self, collided_side):
-        print(self.ball_last_side_bounced_off_of)
-        print(self.ball_position)
-        print(collided_side)
 
     def collision_v2(self, collided_side: int, angle_adjustment: int):
         if collided_side == 0:

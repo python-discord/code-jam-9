@@ -114,7 +114,7 @@ class Paddle(arcade.Sprite):
 
 class Ball(arcade.Sprite):
     """The ball sprite."""
-    
+
     def __init__(self):
         """Initialize a ball sprite.
 
@@ -170,10 +170,11 @@ class Powerup:
 
     def end(self):
         pass
-    
+
     @staticmethod
     def to_string():
         return 'powerup'
+
 
 class PaddleDisappearPowerup(Powerup):
 
@@ -188,10 +189,11 @@ class PaddleDisappearPowerup(Powerup):
     def end(self):
         if not len([powerup for powerup in client.powerups if type(powerup) == PaddleDisappearPowerup]) > 1:
             Paddle.color = arcade.color.WHITE
-    
+
     @staticmethod
     def to_string():
         return 'paddle disappear powerup'
+
 
 class BallDisappearPowerup(Powerup):
 
@@ -211,6 +213,7 @@ class BallDisappearPowerup(Powerup):
     def to_string():
         return 'ball disapper powerup'
 
+
 class InversePowerup(Powerup):
 
     def __init__(self, client) -> None:
@@ -224,6 +227,7 @@ class InversePowerup(Powerup):
 
     def to_string():
         return 'inverse paddle movement powerup'
+
 
 class GameView(arcade.View):
     """The game view."""
@@ -288,8 +292,12 @@ class GameView(arcade.View):
             18,
         )
         if self.client.powerup_message_data is not None:
+            if self.client.powerup_message_data[0] == self.client.player_number:
+                target = "You"
+            else:
+                target = "Player"
             arcade.draw_text(
-                f'{"You " if self.client.powerup_message_data[0] == self.client.player_number else f"Player {self.client.powerup_message_data[0]}"} used a {globals()[self.client.powerup_message_data[1]].to_string()}',
+                "{} Used a {}".format(target, globals()[self.client.powerup_message_data[1]].to_string()),
                 100,
                 600,
                 (*arcade.color.WHITE, 255 * int((3 * 60)/self.powerup_message_timer)),
@@ -505,7 +513,7 @@ class Client(arcade.Window):
                         # Convert keys back to ints because yes
                         updates['players'] = {int(k): v for k, v in updates['players'].items()}
                         self.updates = updates
-                        print(self.updates)
+                        # print(self.updates)
                         self.ball.ball_texture = self.updates['ball_texture']
                         self.scores_text = self.get_score_text()
                         if not len(updates['bricks']) == len(self.bricks):
