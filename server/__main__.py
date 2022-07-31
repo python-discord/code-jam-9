@@ -88,8 +88,10 @@ async def send_event() -> None:
             f'{{"event": "{event_type}", "count": {user_count}, "uname_list": {current_users}}}',
         )
         CONNECTIONS.update_user_count()
-    elif user_count == CONNECTIONS.user_limit and not CONNECTIONS.game_started:
-        # What if user_count equals the limit and the game is started?
+
+async def start_game() -> None:
+    """Starts game"""
+    if CONNECTIONS.user_count == CONNECTIONS.user_limit and not CONNECTIONS.game_started:
         await list(CONNECTIONS.data.values())[0].send('{"event": "start_request"}')
         start = bool(await list(CONNECTIONS.data.values())[0].recv())
         if start:
@@ -128,6 +130,8 @@ async def main() -> None:
         while True:
             while CONNECTIONS.user_limit is None or len(CONNECTIONS) < CONNECTIONS.user_limit:
                 await send_event()
+                await asyncio.sleep(1)
+            await start_game()
             # Dict to track player scores
             scores = {uname: 0 for uname in CONNECTIONS.data.keys()}
             conns = CONNECTIONS.data.values()
