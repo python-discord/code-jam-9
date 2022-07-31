@@ -36,6 +36,8 @@ class ChromaticAberration(RenderTargetTexture):
 class Paddle(arcade.Sprite):
     """The paddle sprite."""
 
+    color = arcade.color.WHITE
+
     def __init__(self, width: int = 10, height: int = 100, number: int = 0, direction: int = 1, local: bool = True):
         """Initialize a paddle sprite.
 
@@ -64,7 +66,6 @@ class Paddle(arcade.Sprite):
             self.center_y = 30
         elif self.number == 3:
             self.center_y = SCREEN_HEIGHT - 30
-        self.color = arcade.color.WHITE
         self.inverted = False
 
     def clamp(self, value: float, min_value: float, max_value: float) -> float:
@@ -167,12 +168,11 @@ class InvisiblePaddlePowerup(Powerup):
 
     def update(self):
         self.timer += 0.01
-        self.client.local_paddle.color = (*arcade.color.WHITE, int((abs(math.sin(self.timer))) * 255 * 0.05))
-        print(self.client.local_paddle.color)
+        Paddle.color = (*arcade.color.WHITE, int((abs(math.sin(self.timer))) * 255 * 0.05))
 
     def end(self):
         if len([powerup for powerup in client.powerups if isinstance(powerup, InvisiblePaddlePowerup)]) <= 1:
-            self.client.local_paddle.color = arcade.color.WHITE
+            Paddle.color = arcade.color.WHITE
 
     @staticmethod
     def to_string():
