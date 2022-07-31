@@ -140,8 +140,8 @@ class Ball(arcade.Sprite):
 
     def draw(self):
         self.bug.draw_scaled(self.center_x, self.center_y, scale=2)
-        
-        
+
+
 class Brick(arcade.Sprite):
 
     def __init__(self, width: int = 10, height: int = 10):
