@@ -7,11 +7,23 @@ import random
 import websockets
 from ball import Ball
 
-x_pattern = [[.25, .5, 50, 10, 1], [.35, .5, 50, 10, 1], [.65, .5, 50, 10, 1], [.75, .5, 50, 10, 1],
-             [.5, .25, 10, 50, 1], [.5, .35, 10, 50, 1], [.5, .65, 10, 50, 1], [.5, .75, 10, 50, 1],
-             [.45, .5, 10, 50, 1], [.55, .5, 10, 50, 1],
-             [.5, .45, 50, 10, 1], [.5, .55, 50, 10, 1]
-             ]
+PATTERNS = {'plus_pattern': [[.25, .5, 50, 10, 1], [.35, .5, 50, 10, 1], [.65, .5, 50, 10, 1], [.75, .5, 50, 10, 1],
+                             [.5, .25, 10, 50, 1], [.5, .35, 10, 50, 1], [.5, .65, 10, 50, 1], [.5, .75, 10, 50, 1],
+                             [.45, .5, 10, 50, 1], [.55, .5, 10, 50, 1],
+                             [.5, .45, 50, 10, 1], [.5, .55, 50, 10, 1]],
+            'cross_pattern': [[.5, .65, 50, 10, 1],
+                              [.45, .6, 10, 50, 1], [.55, .6, 10, 50, 1],
+                              [.40, .55, 50, 10, 1], [.60, .55, 50, 10, 1],
+                              [.35, .5, 10, 50, 1], [.65, .5, 10, 50, 1],
+                              [.40, .45, 50, 10, 1], [.60, .45, 50, 10, 1],
+                              [.45, .40, 10, 50, 1], [.55, .40, 10, 50, 1],
+                              [.5, .35, 50, 10, 1]],
+            'x_pattern': [[.25, .75, 50, 10, 1], [.25, .75, 10, 50, 1], [.75, .75, 50, 10, 1], [.75, .75, 10, 50, 1],
+                          [.37, .63, 50, 10, 1], [.37, .63, 10, 50, 1], [.63, .63, 50, 10, 1], [.63, .63, 10, 50, 1],
+                          [.50, .50, 50, 10, 1], [.50, .50, 10, 50, 1],
+                          [.37, .37, 50, 10, 1], [.37, .37, 10, 50, 1], [.63, .37, 50, 10, 1], [.63, .37, 10, 50, 1],
+                          [.25, .25, 50, 10, 1], [.25, .25, 10, 50, 1], [.75, .25, 50, 10, 1], [.75, .25, 10, 50, 1]]
+            }
 
 
 class Player:
@@ -88,10 +100,11 @@ class Bricks:
         self.screen_size = screen_size
         self.brick_list = []
         self.server = server_reference
+        self.generate_based_on_pattern()
 
     def generate_based_on_pattern(self):
-        # todo add random choice patters and more patterns
-        pattern = x_pattern
+        pattern = random.choice(list(PATTERNS.values()))
+        # pattern = PATTERNS["x_pattern"]
         for p in pattern:
             self.brick_list.append(Brick(self.screen_size[0]*p[0],
                                          self.screen_size[1]*p[1],
@@ -185,10 +198,10 @@ class Server:
     def add_to_total_bounces(self):
         self.total_bounces += 1
 
-    def add_score(self):
+    def add_score(self, points: int = 1):
         """Update the score."""
         if self.last_client_bounced is not None:
-            self.last_client_bounced.score += 1
+            self.last_client_bounced.score += points
 
     async def game_update(self):
         if self.active_clients:

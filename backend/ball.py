@@ -74,14 +74,13 @@ class Ball:
                     print('hit a brick')
                     # self.server.add_score(brick.points)
                     collided_side = self.ball_last_side_bounced_off_of
-                    print(collided_side, self.server.last_client_bounced)
                     self.server.bricks.delete_brick(brick, self.server.last_client_bounced)
+                    self.server.add_score(brick.points)
 
         # Ball collision logic
         if collided_side is not None:
             self.ball_bounced = True
 
-            # print('old ball angle', self.ball_angle)
             # Calculate new ball speed
             if collided_side == 0:
                 self.ball_angle = (-self.ball_angle[0], self.ball_angle[1])
@@ -92,12 +91,11 @@ class Ball:
             if collided_side == 3:
                 self.ball_angle = (self.ball_angle[0], -self.ball_angle[1])
             self.invulnerability = 5
-            # print('new ball angle', self.ball_angle)
             self.total_bounces += 1
 
-        if random.randint(5, 15) < self.total_bounces < 10000:
-            self.server.bricks.generate_based_on_pattern()
-            self.total_bounces = 10000
+            if random.randint(5, 15) < self.total_bounces < 10000:
+                self.server.bricks.generate_based_on_pattern()
+                self.total_bounces = 10000
 
         else:
             self.ball_bounced = False
