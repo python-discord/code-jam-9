@@ -88,8 +88,14 @@ async def send_event() -> None:
             f'{{"event": "{event_type}", "count": {user_count}, "uname_list": {current_users}}}',
         )
         CONNECTIONS.update_user_count()
-    elif user_count == CONNECTIONS.user_limit and not CONNECTIONS.game_started:
-        # What if user_count equals the limit and the game is started?
+
+
+async def start_game() -> None:
+    """Starts game"""
+    if (
+        CONNECTIONS.user_count == CONNECTIONS.user_limit
+        and not CONNECTIONS.game_started
+    ):
         await list(CONNECTIONS.data.values())[0].send('{"event": "start_request"}')
         start = bool(await list(CONNECTIONS.data.values())[0].recv())
         if start:
@@ -104,16 +110,22 @@ async def send_question(question) -> None | int:
         send_question = question.copy()
         answer = send_question.pop("correct_answer")
         send_question = json.dumps(send_question)
-        websockets.broadcast(CONNECTIONS.data.values(), '{"event": "question", "question": ' + send_question + '}')
+        websockets.broadcast(
+            CONNECTIONS.data.values(),
+            '{"event": "question", "question": ' + send_question + "}",
+        )
         return answer
 
 
 async def collect_answers() -> None | dict:
     """Gathers player answers to most recently asked question"""
     if CONNECTIONS.game_started:
-        return {
-            uname: int(await conn.recv()) for uname, conn in CONNECTIONS.data.values()
-        }
+        answers = {uname: None for uname in CONNECTIONS.data.keys()}
+        for conn in CONNECTIONS.data.values():
+            index = list(CONNECTIONS.data.values()).index(conn)
+            uname = list(CONNECTIONS.data.keys())[index]
+            answers[uname] = await conn.recv()
+        return answers
 
 
 # for conn in CONNECTIONS.data.values():
@@ -127,29 +139,45 @@ async def main() -> None:
     async with websockets.serve(connect, "localhost", 8081):
         while True:
             await send_event()
+            await start_game()
             # Dict to track player scores
+            if not CONNECTIONS.game_started:
+                await asyncio.sleep(1)
+                continue
             scores = {uname: 0 for uname in CONNECTIONS.data.keys()}
             conns = CONNECTIONS.data.values()
             # Iterate sending a question, collecting answers, and checking them
             for question in QUESTIONS.questions:
                 correct = await send_question(question)
+                if correct is None:
+                    break
                 answers = await collect_answers()
                 await asyncio.sleep(1)
                 update_scores(scores, answers, correct)
-                websockets.broadcast(conns, '{"event": "score_update", "scores": ' + json.dumps(scores) + '}')
+                websockets.broadcast(
+                    conns,
+                    '{"event": "score_update", "scores": ' + json.dumps(scores) + "}",
+                )
 
             # Sort scores in descending order
             scores = {
                 uname: score
                 for uname, score in sorted(scores.items(), key=lambda item: -item[1])
             }
+            if not CONNECTIONS.game_started:
+                await asyncio.sleep(1)
+                continue
             # Since the first element has the highest score
             # winner = next(iter(scores.keys()))
             winner = "Frodo"
             # TODO tiebreaker method of closest to selected random number
             websockets.broadcast(
                 conns,
-                '{"event": "game_over", "winner": "' + winner + '", "scores": ' + json.dumps(scores) + '}'
+                '{"event": "game_over", "winner": "'
+                + winner
+                + '", "scores": '
+                + json.dumps(scores)
+                + "}",
             )
 
 
