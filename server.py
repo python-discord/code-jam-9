@@ -8,23 +8,56 @@ import websockets
 
 from ball import Ball
 
-PATTERNS = {'plus_pattern': [[.25, .5, 50, 10, 1], [.35, .5, 50, 10, 1], [.65, .5, 50, 10, 1], [.75, .5, 50, 10, 1],
-                             [.5, .25, 10, 50, 1], [.5, .35, 10, 50, 1], [.5, .65, 10, 50, 1], [.5, .75, 10, 50, 1],
-                             [.45, .5, 10, 50, 1], [.55, .5, 10, 50, 1],
-                             [.5, .45, 50, 10, 1], [.5, .55, 50, 10, 1]],
-            'cross_pattern': [[.5, .65, 50, 10, 1],
-                              [.45, .6, 10, 50, 1], [.55, .6, 10, 50, 1],
-                              [.40, .55, 50, 10, 1], [.60, .55, 50, 10, 1],
-                              [.35, .5, 10, 50, 1], [.65, .5, 10, 50, 1],
-                              [.40, .45, 50, 10, 1], [.60, .45, 50, 10, 1],
-                              [.45, .40, 10, 50, 1], [.55, .40, 10, 50, 1],
-                              [.5, .35, 50, 10, 1]],
-            'x_pattern': [[.25, .75, 50, 10, 1], [.25, .75, 10, 50, 1], [.75, .75, 50, 10, 1], [.75, .75, 10, 50, 1],
-                          [.37, .63, 50, 10, 1], [.37, .63, 10, 50, 1], [.63, .63, 50, 10, 1], [.63, .63, 10, 50, 1],
-                          [.50, .50, 50, 10, 1], [.50, .50, 10, 50, 1],
-                          [.37, .37, 50, 10, 1], [.37, .37, 10, 50, 1], [.63, .37, 50, 10, 1], [.63, .37, 10, 50, 1],
-                          [.25, .25, 50, 10, 1], [.25, .25, 10, 50, 1], [.75, .25, 50, 10, 1], [.75, .25, 10, 50, 1]]
-            }
+BRICK_PATTERNS = {
+    'plus_pattern': [
+        [0.25, 0.50, 50, 10],
+        [0.35, 0.50, 50, 10],
+        [0.65, 0.50, 50, 10],
+        [0.75, 0.50, 50, 10],
+        [0.50, 0.25, 10, 50],
+        [0.50, 0.35, 10, 50],
+        [0.50, 0.65, 10, 50],
+        [0.50, 0.75, 10, 50],
+        [0.45, 0.50, 10, 50],
+        [0.55, 0.50, 10, 50],
+        [0.50, 0.45, 50, 10],
+        [0.50, 0.55, 50, 10],
+    ],
+    'cross_pattern': [
+        [0.50, 0.65, 50, 10],
+        [0.45, 0.60, 10, 50],
+        [0.55, 0.60, 10, 50],
+        [0.40, 0.55, 50, 10],
+        [0.60, 0.55, 50, 10],
+        [0.35, 0.50, 10, 50],
+        [0.65, 0.50, 10, 50],
+        [0.40, 0.45, 50, 10],
+        [0.60, 0.45, 50, 10],
+        [0.45, 0.40, 10, 50],
+        [0.55, 0.40, 10, 50],
+        [0.50, 0.35, 50, 10],
+    ],
+    'x_pattern': [
+        [0.25, 0.75, 50, 10],
+        [0.25, 0.75, 10, 50],
+        [0.75, 0.75, 50, 10],
+        [0.75, 0.75, 10, 50],
+        [0.37, 0.63, 50, 10],
+        [0.37, 0.63, 10, 50],
+        [0.63, 0.63, 50, 10],
+        [0.63, 0.63, 10, 50],
+        [0.50, 0.50, 50, 10],
+        [0.50, 0.50, 10, 50],
+        [0.37, 0.37, 50, 10],
+        [0.37, 0.37, 10, 50],
+        [0.63, 0.37, 50, 10],
+        [0.63, 0.37, 10, 50],
+        [0.25, 0.25, 50, 10],
+        [0.25, 0.25, 10, 50],
+        [0.75, 0.25, 50, 10],
+        [0.75, 0.25, 10, 50],
+    ],
+}
 
 
 class Player:
@@ -49,13 +82,12 @@ class Player:
             'position': self.paddle_position,
             'score': self.score,
             'player_number': self.player_number,
-            'paddle_size': self.paddle_size
+            'paddle_size': self.paddle_size,
         }
         return data
 
 
 class Powerup:
-
     def __init__(self):
         pass
 
@@ -68,38 +100,33 @@ class Powerup:
             'data': {
                 'user': player.player_number,
                 'type': self.__class__.__name__,
-            }
+            },
         }
-        websockets.broadcast(  # type: ignore
-            server.client_websockets,
-            json.dumps(data)
-        )
+        websockets.broadcast(server.client_websockets, json.dumps(data))  # type: ignore
 
     def to_json(self):
         return {"type": self.__class__.__name__, "user": self.user.player_number}
 
 
-class PaddleDisappearPowerup(Powerup):
+class InvisiblePaddlePowerup(Powerup):
     pass
 
 
-class BallDisappearPowerup(Powerup):
+class InvisibleBallPowerup(Powerup):
     pass
 
 
-class InversePowerup(Powerup):
+class InvertedPaddlePowerup(Powerup):
     pass
 
 
 class Brick:
 
-    powerups = [PaddleDisappearPowerup, BallDisappearPowerup, InversePowerup]
-    powerup_chance = 5
-
-    def __init__(self, position_x: int, position_y: int, size: tuple = (10, 50), points: int = 1):
+    def __init__(self, position_x: int, position_y: int, size: tuple = (10, 50)):
         self.size = size
         self.position = (position_x, position_y)
-        self.points = points
+        self.powerups = [InvisiblePaddlePowerup, InvisibleBallPowerup, InvertedPaddlePowerup]
+        self.powerup_chance = 5
 
     def get_powerup(self):
         if random.randint(1, self.powerup_chance) == 1:
@@ -107,22 +134,22 @@ class Brick:
 
 
 class Bricks:
-
-    def __init__(self, screen_size, server_reference):
+    def __init__(self, screen_size, server):
         self.screen_size = screen_size
-        self.brick_list = []
-        self.server = server_reference
+        self.brick_list: list[Brick] = []
+        self.server = server
         self.generate_based_on_pattern()
 
     def generate_based_on_pattern(self):
-        pattern = random.choice(list(PATTERNS.values()))
-        # pattern = PATTERNS["x_pattern"]
+        pattern = random.choice(list(BRICK_PATTERNS.values()))
         for p in pattern:
-            self.brick_list.append(Brick(self.screen_size[0]*p[0],
-                                         self.screen_size[1]*p[1],
-                                         (p[2], p[3]),
-                                         p[4]
-                                         ))
+            self.brick_list.append(
+                Brick(
+                    self.screen_size[0] * p[0],
+                    self.screen_size[1] * p[1],
+                    (p[2], p[3]),
+                )
+            )
 
     def delete_brick(self, brick: Brick, player: Player):
         powerup = brick.get_powerup()
@@ -139,9 +166,6 @@ class Bricks:
     def empty_bricks(self):
         self.brick_list = []
 
-        # data = [list(brick.position) for brick self.brick_list]
-        # return data
-
 
 class Server:
     """The pong game server."""
@@ -152,20 +176,20 @@ class Server:
         self.max_players = max_players
         self.active_clients: dict[int, Player] = {}
         self.client_websockets = []
-        # Ball variables
-        self.max_players = 4
-        self.screen_size = (700, 700)
         self.paddle_size = (10, 100)
         self.ball = Ball(self.screen_size, self)
         self.bricks = Bricks(self.screen_size, self)
         self.powerups: list[Powerup] = []
-        self.last_client_bounced: Player = None
+        self.last_client_bounced = None
+
+    def run(self):
+        asyncio.run(self.main())
 
     async def main(self):
         """Process a game loop tick."""
         async with websockets.serve(self.handler, '0.0.0.0', 8765):  # type: ignore
             while True:
-                await self.game_update()
+                self.game_update()
                 await self.broadcast_updates()
                 await asyncio.sleep(1 / 60)
 
@@ -186,12 +210,9 @@ class Server:
                         'data': {
                             'new': player.player_number,
                             'ingame': [k for k in self.active_clients.keys() if k != player.player_number],
-                        }
+                        },
                     }
-                    websockets.broadcast(  # type: ignore
-                        self.client_websockets,
-                        json.dumps(data)
-                    )
+                    websockets.broadcast(self.client_websockets, json.dumps(data))  # type: ignore
                 elif event['type'] == 'paddle':
                     # Paddle position update
                     player.paddle_position = event['data']
@@ -204,20 +225,17 @@ class Server:
                 self.last_client_bounced = None
             websockets.broadcast(  # type: ignore
                 self.client_websockets,
-                json.dumps({'type': 'leave', 'data': player.player_number})
+                json.dumps({'type': 'leave', 'data': player.player_number}),
             )
-
-    def add_to_total_bounces(self):
-        self.total_bounces += 1
 
     def add_score(self, side_bounced, points: int = 1):
         """Update the score."""
-        if self.last_client_bounced is not None and not self.last_client_bounced == side_bounced:
+        if self.last_client_bounced is not None and self.last_client_bounced != side_bounced:
             self.last_client_bounced.score += points
 
-    async def game_update(self):
+    def game_update(self):
         if self.active_clients:
-            await self.ball.update_ball_position()
+            self.ball.update_position()
         powerups = []
         for powerup in self.powerups:
             powerup.timer -= 1
@@ -233,15 +251,15 @@ class Server:
             'data': {
                 'players': players,
                 'bricks': self.bricks.to_json(),
-                'ball': self.ball.ball_position,
+                'ball': self.ball.position,
                 'ball_texture': self.ball.texture,
-                'bounce': self.ball.ball_bounced,
-                'powerups': [powerup.to_json() for powerup in self.powerups]
-            }
+                'bounce': self.ball.bounced,
+                'powerups': [powerup.to_json() for powerup in self.powerups],
+            },
         }
         websockets.broadcast(self.client_websockets, json.dumps(updates))  # type: ignore
 
 
 if __name__ == '__main__':
     server = Server()
-    asyncio.run(server.main())
+    server.run()
