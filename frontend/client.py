@@ -116,7 +116,7 @@ class Paddle(arcade.Sprite):
 class Ball(arcade.Sprite):
     """The ball sprite."""
 
-    def __init__(self, width: int = 10, height: int = 10, radius: int = 5):
+    def __init__(self, width: int = 10, height: int = 10, radius: int = 10):
         """Initialize a ball sprite.
 
         Args:
@@ -128,9 +128,7 @@ class Ball(arcade.Sprite):
         self.height = height
         self.radius = radius
         self.color = arcade.color.WHITE
-        self.bug_arm_angles = [45, 135, 225, 315]
-        self.bug_arm_x_shift = [self.radius*math.sin(x) for x in self.bug_arm_angles]
-        self.bug_arm_y_shift = [self.radius*math.cos(x) for x in self.bug_arm_angles]
+        self.bug = arcade.load_texture('images/bug.png')
 
     def update(self, position: tuple[int, int]):
         """Update the ball location.
@@ -141,17 +139,9 @@ class Ball(arcade.Sprite):
         self.center_x, self.center_y = position
 
     def draw(self):
-        # arcade.draw_rectangle_filled(self.center_x, self.center_y, self.width, self.height, self.color)
-        arcade.draw_circle_filled(self.center_x, self.center_y, self.radius, self.color)
-        bug_arm_x_start = [self.center_x+x for x in self.bug_arm_x_shift]
-        bug_arm_x_end = [(2*self.center_x)+x for x in self.bug_arm_x_shift]
-        bug_arm_y_start = [self.center_y+y for y in self.bug_arm_y_shift]
-        bug_arm_y_end =  [(2*self.center_y)+y for y in self.bug_arm_y_shift]
-        for i in range(len(self.bug_arm_angles)):
-            arcade.draw_line(bug_arm_x_start[i],
-            bug_arm_y_start[i], bug_arm_x_end[i],
-            bug_arm_y_end[i], self.color)
-
+        self.bug.draw_scaled(self.center_x, self.center_y, scale=2)
+        
+        
 class Brick(arcade.Sprite):
 
     def __init__(self, width: int = 10, height: int = 10):
