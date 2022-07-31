@@ -6,14 +6,14 @@ To contribute, view our [contributing guide](CONTRIBUTING.md).
 
 ## Introducing `SpeeDebug`
 
-Debugging can be motivating, but it isn't usually fun. _Simulated_ debugging 
-is another story. SpeeDebug is a browser-based multiplayer game that challenges 
-players to debug some seriously broken Python code. Each round consists of five 
-multiple-choice questions, each of which offers a snippet of bugged code and 
-several options for debugging it. Players receive one point for each correct 
-response. At the end of a game, whoever has the most points wins. 
+Debugging can be motivating, but it isn't usually fun. _Simulated_ debugging
+is another story. SpeeDebug is a browser-based multiplayer game that challenges
+players to debug some seriously broken Python code. Each round consists of five
+multiple-choice questions, each of which offers a snippet of bugged code and
+several options for debugging it. Players receive one point for each correct
+response. At the end of a game, whoever has the most points wins.
 
-The first player to join a game can designate the maximum number of players. 
+The first player to join a game can designate the maximum number of players.
 Gameplay begins once that many players have joined.
 
 It's a bug _and_ a feature.
@@ -26,6 +26,6 @@ To run the client locally, you must have `node` installed. Then, navigate to the
 
 ## Extending `SpeeDebug`
 
-`SpeeDebug` ships with a bank of questions stored in `questions.json` in 
-the `server` directory. We encourage you to fork this repository and add 
+`SpeeDebug` ships with a bank of questions stored in `questions.json` in
+the `server` directory. We encourage you to fork this repository and add
 some of your own.
