@@ -497,7 +497,6 @@ class Client(arcade.Window):
                         # Convert keys back to ints because yes
                         updates['players'] = {int(k): v for k, v in updates['players'].items()}
                         self.updates = updates
-                        print(self.updates)
                         self.ball.ball_texture = self.updates['ball_texture']
                         self.scores_text = self.get_score_text()
                         if not len(updates['bricks']) == len(self.bricks):

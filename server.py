@@ -195,7 +195,7 @@ class Server:
                     # Paddle position update
                     player.paddle_position = event['data']
         except Exception as e:
-            print(e)
+            pass
         finally:
             # Clean up the connection
             await websocket.close()

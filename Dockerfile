@@ -12,4 +12,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project to working directory
 COPY . .
 
-CMD ["python", "./backend/server.py"]
+CMD ["python", "server.py"]
