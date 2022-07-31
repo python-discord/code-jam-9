@@ -110,7 +110,9 @@ async def send_question(question) -> None | int:
 async def collect_answers() -> None | dict:
     """Gathers player answers to most recently asked question"""
     if CONNECTIONS.game_started:
-        return {uname: await conn.recv() for uname, conn in CONNECTIONS.data.values()}
+        return {
+            uname: int(await conn.recv()) for uname, conn in CONNECTIONS.data.values()
+        }
 
 
 # for conn in CONNECTIONS.data.values():
