@@ -222,6 +222,7 @@ class Server:
                 'players': players,
                 'bricks': self.bricks.to_json(),
                 'ball': self.ball.ball_position,
+                'ball_texture': self.ball.texture,
                 'bounce': self.ball.ball_bounced,
                 'powerups': [powerup.to_json() for powerup in self.powerups]
             }
