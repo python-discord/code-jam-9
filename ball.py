@@ -102,8 +102,8 @@ class Ball:
             self.ball_position[1] + self.ball_angle[1]
         )
         self.invulnerability -= 1
-        if (self.ball_position[0] < -10 or self.ball_position[1] < -10
-                or self.ball_position[0] > 750 or self.ball_position[1] > 750):
+        if ((self.ball_position[1] < 30 and (self.ball_position[0] > 670 or self.ball_position[0] < 30))
+                or (self.ball_position[1] > 670 and (self.ball_position[0] > 670 or self.ball_position[0] < 30))):
             self.reset_ball()
             self.texture = 1
 

@@ -285,7 +285,7 @@ class GameView(arcade.View):
         )
         if self.client.powerup_message_data is not None:
             arcade.draw_text(
-                f'{"You " if self.client.powerup_message_data[0] == self.client.player_number else f"Player {self.client.powerup_message_data[0]}"} used a {globals()[self.client.powerup_message_data[1]].to_string()}',  # noqa: E501
+                f'{"You" if self.client.powerup_message_data[0] == self.client.player_number else f"Player {self.client.powerup_message_data[0]}"} used a {globals()[self.client.powerup_message_data[1]].to_string()}',  # noqa: E501
                 100,
                 600,
                 (*arcade.color.WHITE, 255 * int((3 * 60)/self.powerup_message_timer)),
