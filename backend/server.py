@@ -55,15 +55,21 @@ class Powerup:
         return {"type": self.__class__.__name__, "user": self.user.player_number}
 
 
-class DisappearPowerup(Powerup):
+class PaddleDisappearPowerup(Powerup):
     pass
+
+
+class BallDisappearPowerup(Powerup):
+    pass
+
 
 class InversePowerup(Powerup):
     pass
 
+
 class Brick:
 
-    powerups = [DisappearPowerup, InversePowerup]
+    powerups = [PaddleDisappearPowerup, BallDisappearPowerup, InversePowerup]
     powerup_chance = 5
 
     def __init__(self, position_x: int, position_y: int, size: tuple = (10, 50), points: int = 1):

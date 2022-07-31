@@ -20,7 +20,7 @@ class ChromaticAberration(RenderTargetTexture):
         super().__init__(width, height)
         with open(os.path.dirname(os.path.realpath(__file__)) + "/shader.glsl") as file:
             self.program = self.ctx.program(
-                vertex_shader=""" 
+                vertex_shader="""
                 #version 330
 
                 in vec2 in_vert;
@@ -33,7 +33,6 @@ class ChromaticAberration(RenderTargetTexture):
                 }
                 """,
                 fragment_shader=file.read()
-                
             )
         self.program["resolution"] = (width, height)
 
@@ -50,6 +49,7 @@ class Paddle(arcade.Sprite):
 
     color = arcade.color.WHITE
     inverse = False
+
     def __init__(self, width: int = 10, height: int = 100, number: int = 0, direction: int = 1, local: bool = True):
         """Initialize a paddle sprite.
 
@@ -93,12 +93,14 @@ class Paddle(arcade.Sprite):
             mouse_pos = position[self.direction]
             if self.direction == 0:
                 if self.inverse:
-                    self.center_x = abs(SCREEN_WIDTH - self.clamp(mouse_pos, self.width / 2, SCREEN_WIDTH - self.width / 2))
+                    self.center_x = abs(SCREEN_WIDTH - self.clamp(mouse_pos, self.width / 2,
+                                        SCREEN_WIDTH - self.width / 2))
                 else:
                     self.center_x = self.clamp(mouse_pos, self.width / 2, SCREEN_WIDTH - self.width / 2)
             else:
                 if self.inverse:
-                    self.center_y = abs(SCREEN_HEIGHT - self.clamp(mouse_pos, self.height / 2, SCREEN_HEIGHT - self.height / 2))
+                    self.center_y = abs(SCREEN_HEIGHT - self.clamp(mouse_pos, self.height / 2,
+                                        SCREEN_HEIGHT - self.height / 2))
                 else:
                     self.center_y = self.clamp(mouse_pos, self.height / 2, SCREEN_HEIGHT - self.height / 2)
         else:
@@ -111,6 +113,8 @@ class Paddle(arcade.Sprite):
 class Ball(arcade.Sprite):
     """The ball sprite."""
 
+    color = arcade.color.WHITE
+
     def __init__(self, width: int = 10, height: int = 10):
         """Initialize a ball sprite.
 
@@ -121,7 +125,6 @@ class Ball(arcade.Sprite):
         super().__init__()
         self.width = width
         self.height = height
-        self.color = arcade.color.WHITE
 
     def update(self, position: tuple[int, int]):
         """Update the ball location.
@@ -164,7 +167,7 @@ class Powerup:
         pass
 
 
-class DisappearPowerup(Powerup):
+class PaddleDisappearPowerup(Powerup):
 
     def __init__(self, client) -> None:
         self.timer = 0
@@ -173,11 +176,25 @@ class DisappearPowerup(Powerup):
     def update(self):
         self.timer += 0.01
         Paddle.color = (*arcade.color.WHITE, (abs(math.sin(self.timer))) * 255 * 0.05)
-        print(abs(math.sin(self.timer)))
 
     def end(self):
-        if not len([powerup for powerup in client.powerups if type(powerup) == DisappearPowerup]) > 1:
+        if not len([powerup for powerup in client.powerups if type(powerup) == PaddleDisappearPowerup]) > 1:
             Paddle.color = arcade.color.WHITE
+
+
+class BallDisappearPowerup(Powerup):
+
+    def __init__(self, client) -> None:
+        self.timer = 0
+        self.client = client
+
+    def update(self):
+        self.timer += 0.01
+        Ball.color = (*arcade.color.WHITE, (abs(math.sin(self.timer))) * 255 * 0.05)
+
+    def end(self):
+        if not len([powerup for powerup in client.powerups if type(powerup) == BallDisappearPowerup]) > 1:
+            Ball.color = arcade.color.WHITE
 
 
 class InversePowerup(Powerup):
@@ -208,7 +225,7 @@ class GameView(arcade.View):
         self.client.set_mouse_visible(True)
 
     def on_update(self, delta_time: float):
-        if (random.randint(1,30) > 2):
+        if (random.randint(1, 30) > 2):
             self.timer += delta_time
             self.shader.program["time"] = self.timer
         if not self.client.updates:
@@ -238,7 +255,7 @@ class GameView(arcade.View):
                 continue
             paddle.draw()
         for brick in self.client.bricks:
-            brick.draw() 
+            brick.draw()
         arcade.draw_text(
             self.client.scores_text,
             10,
@@ -272,7 +289,7 @@ class MainMenuView(arcade.View):
         v_box.add(ip_title)
 
         ip_input = arcade.gui.UIInputText(
-            text="0.0.0.0",
+            text="zesty-zombies.pshome.me",
             width=200,
             text_color=arcade.color.WHITE
         )
