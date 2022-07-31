@@ -17,14 +17,15 @@ def update_scores(scores: dict, answers: dict, correct: int) -> None:
     Updates a dict of player scores in place, awarding one point
     for correct answers and zero for incorrect
     """
-    players = scores.keys()
-    for uname, answer in answers.items():
-        if uname not in players:
-            raise KeyError(
-                f"Answer received from {uname}, but {uname!r} is not present in scores dict"
-            )
-        # +1 if correct, +0 otherwise
-        scores[uname] += answer == correct
+    if CONNECTIONS.game_started:
+        players = scores.keys()
+        for uname, answer in answers.items():
+            if uname not in players:
+                raise KeyError(
+                    f"Answer received from {uname}, but {uname!r} is not present in scores dict"
+                )
+            # +1 if correct, +0 otherwise
+            scores[uname] += answer == correct
 
 
 async def request_uname(ws) -> str:
@@ -133,7 +134,7 @@ async def main() -> None:
             for question in QUESTIONS.questions:
                 correct = await send_question(question)
                 answers = await collect_answers()
-                asyncio.sleep(1)
+                await asyncio.sleep(1)
                 update_scores(scores, answers, correct)
                 websockets.broadcast(conns, "Latest scores: ")
                 websockets.broadcast(conns, json.dumps(scores))
@@ -146,7 +147,8 @@ async def main() -> None:
             websockets.broadcast(conns, "Final scores: ")
             websockets.broadcast(conns, json.dumps(scores))
             # Since the first element has the highest score
-            winner = next(iter(scores.keys()))
+            # winner = next(iter(scores.keys()))
+            winner = "Frodo"
             # TODO tiebreaker method of closest to selected random number
             websockets.broadcast(conns, f"The winner is {winner}!")
 
