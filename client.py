@@ -18,9 +18,9 @@ from arcade.experimental.texture_render_target import RenderTargetTexture
 class ChromaticAberration(RenderTargetTexture):
     def __init__(self, width, height):
         super().__init__(width, height)
-        with open(os.path.join(os.path.dirname(__file__), 'assets', 'shaders', 'fragment.glsl')) as file:
+        with open(os.path.join(ASSETS_DIR, 'shaders', 'fragment.glsl')) as file:
             fragment_shader = file.read()
-        with open(os.path.join(os.path.dirname(__file__), 'assets', 'shaders', 'vertex.glsl')) as file:
+        with open(os.path.join(ASSETS_DIR, 'shaders', 'vertex.glsl')) as file:
             vertex_shader = file.read()
         self.program = self.ctx.program(
             fragment_shader=fragment_shader,
@@ -116,8 +116,8 @@ class Ball(arcade.Sprite):
         """
         super().__init__()
         self.color = arcade.color.WHITE
-        self.bug = arcade.load_texture('images/bug.png')
-        self.dvd = arcade.load_texture('images/dvd.png')
+        self.bug = arcade.load_texture(os.path.join(ASSETS_DIR, 'images', 'bug.png'))
+        self.dvd = arcade.load_texture(os.path.join(ASSETS_DIR, 'images', 'dvd.png'))
         self.ball_texture = 0
 
     def update(self, position: tuple[int, int]):
@@ -517,6 +517,7 @@ class Client(arcade.Window):
 
 SCREEN_WIDTH = 700
 SCREEN_HEIGHT = 700
+ASSETS_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
 if __name__ == '__main__':
     client = Client()
