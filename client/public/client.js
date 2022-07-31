@@ -1,5 +1,9 @@
 console.log("Starting client");
 var socket = ""
+var gameStarted = false;
+var uname_list = [];
+var onlineCount = 0;
+var scores = {};
 
 function connectToServer() {
   // Lockout User Input
@@ -52,33 +56,68 @@ function connectToServer() {
       document.getElementById('input-button').disabled = false;
     }
 
-    if (message.event == "ulimit_request") {
+    else if (message.event == "ulimit_request") {
       document.getElementById('input-label').innerHTML = "Max Players:";
       document.getElementById('input').disabled = false;
       document.getElementById('input').value = "";
       document.getElementById('input-button').disabled = false;
     }
 
-    if (message.event == "user_join" || message.event == "user_leave") {
-      document.getElementById('player-count').innerHTML = `${message.count}<br>`;
-      let playerListHtml = message.uname_list.map((player) => {
-        return `<li>${player}</li>`;
-      }).join('')
-      document.getElementById('player-list').innerHTML = playerListHtml;
+    else if (message.event == "user_join" || message.event == "user_leave") {
+      if (message.event == "user_join") {
+        message.uname_list.map((player) => {
+          scores[player] = 0;
+        })
+        onlineCount = message.count;
+        uname_list = message.uname_list;
+      }
+      updatePlayerData();
     }
 
-    if (message.error == "user limit has been reached"){
+    else if (message.error == "user limit has been reached"){
       document.getElementById('error-field').innerHTML = "Server Full";
       resetSetup();
     }
 
-    if (message.event == "start_request"){
+    else if (message.event == "start_request"){
         document.getElementById('start-button').disabled = false;
     }
 
-    if (message.event == "game_start"){
+    else if (message.event == "game_start"){
         document.getElementById('start-button').disabled = true;
-        gameSetup(event_data);
+        gameStarted = true;
+    }
+
+    else if (message.event == "question"){
+        document.getElementById('question-field').innerHTML = message.question;
+        document.getElementById('traceback').innerHTML = message.traceback;
+        document.getElementById('code-area').innerHTML = message.code;
+
+        document.getElementById('0').innerHTML = message.possible_answers[0];
+        document.getElementById('1').innerHTML = message.possible_answers[1];
+        document.getElementById('2').innerHTML = message.possible_answers[2];
+        document.getElementById('3').innerHTML = message.possible_answers[3];
+
+        document.getElementById('0').innerHTML = message.possible_answers[0];
+        document.getElementById('1').innerHTML = message.possible_answers[1];
+        document.getElementById('2').innerHTML = message.possible_answers[2];
+        document.getElementById('3').innerHTML = message.possible_answers[3];
+    }
+
+    else if (message.event == "score_update"){
+        scores = message.scores;
+        updatePlayerData();
+    }
+
+    else if (message.event == "game_over"){
+        scores = message.scores;
+        updatePlayerData();
+
+        document.getElementById('question-area').innerHTML = "The Winner Is " + message.winner + "!";
+        document.getElementById('0').innerHTML = "GAME OVER";
+        document.getElementById('1').innerHTML = "GAME OVER";
+        document.getElementById('2').innerHTML = "GAME OVER";
+        document.getElementById('3').innerHTML = "GAME OVER";
     }
 
   });
@@ -114,6 +153,7 @@ function sendUName() {
 }
 
 function sendULimit() {
+  console.log("send start request from client");
   var ulimit = parseInt(document.getElementById('input').value);
   console.log("Sending ulimit ", ulimit);
   socket.send(JSON.stringify({
@@ -124,14 +164,28 @@ function sendULimit() {
   document.getElementById('input-button').disabled = true;
 }
 
-function sendStartRequest() {
-    console.log("send start request from client");
-    socket.send(JSON.stringify(true));
+function updatePlayerData() {
+  document.getElementById('player-count').innerHTML = `${onlineCount}<br>`;
+  let playerListHtml = uname_list.map((player) => {
+    return `<li>${player} - ${scores.player}</li>`;
+  }).join('')
+  console.log(playerListHtml);
+  document.getElementById('player-list').innerHTML = playerListHtml;
 }
 
-function gameSetup() {
-
+function sendStartRequest() {
+    console.log("Sending Start Request To Server");
+    socket.send('{"event": "start_request"}');
 }
 
 function processAnswer(answer) {
+  console.log("Sending Answer To Server");
+
+  // Uncomment the below line if you would rather send the answer as the text, not a number
+  // answer = document.getElementById(answer).innerHTML;
+
+  // Modify this send if this is not the desired behavior
+  socket.send(JSON.stringify({
+    "answer": answer
+  }));
 }
