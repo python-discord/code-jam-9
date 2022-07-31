@@ -155,7 +155,6 @@ class Bricks:
         self.screen_size = screen_size
         self.brick_list: list[Brick] = []
         self.server = server
-        self.generate_based_on_pattern()
 
     def generate_based_on_pattern(self):
         pattern = random.choice(list(BRICK_PATTERNS.values()))
