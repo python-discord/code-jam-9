@@ -28,7 +28,7 @@ class Ball:
         if ball_x <= 0 and self.invulnerability <= 0:
             print('wall bounce 0', ball_x, ball_y, self.invulnerability)
             if self.server.active_clients.get(0) is not None:
-                self.server.add_score()
+                self.server.add_score(0)
                 self.reset_ball()
             else:
                 collided_side = 0
@@ -37,7 +37,7 @@ class Ball:
         if ball_x >= self.server.screen_size[0] and self.invulnerability <= 0:
             print('wall bounce 1', ball_x, ball_y, self.invulnerability)
             if self.server.active_clients.get(1) is not None:
-                self.server.add_score()
+                self.server.add_score(1)
                 self.reset_ball()
             else:
                 collided_side = 1
@@ -46,7 +46,7 @@ class Ball:
         if ball_y <= 0 and self.invulnerability <= 0:
             print('wall bounce 2', ball_x, ball_y, self.invulnerability)
             if self.server.active_clients.get(2) is not None:
-                self.server.add_score()
+                self.server.add_score(2)
                 self.reset_ball()
             else:
                 collided_side = 2
@@ -55,7 +55,7 @@ class Ball:
         if ball_y >= self.server.screen_size[1] and self.invulnerability <= 0:
             print('wall bounce 3', ball_x, ball_y, self.invulnerability)
             if self.server.active_clients.get(3) is not None:
-                self.server.add_score()
+                self.server.add_score(3)
                 self.reset_ball()
             else:
                 collided_side = 3

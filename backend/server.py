@@ -62,6 +62,17 @@ class Powerup:
         self.user = player
         self.timer = timer * 60
         server.powerups.append(self)
+        data = {
+            'type': 'new_powerup',
+            'data': {
+                'user': player.player_number,
+                'type': self.__class__.__name__,
+            }
+        }
+        websockets.broadcast(  # type: ignore
+            server.client_websockets,
+            json.dumps(data)
+        )
 
     def to_json(self):
         return {"type": self.__class__.__name__, "user": self.user.player_number}
@@ -190,6 +201,8 @@ class Server:
             await websocket.close()
             self.client_websockets.remove(websocket)
             del self.active_clients[player.player_number]  # Clear client num
+            if self.last_client_bounced == player.player_number:
+                self.last_client_bounced = None
             websockets.broadcast(  # type: ignore
                 self.client_websockets,
                 json.dumps({'type': 'leave', 'data': player.player_number})
@@ -198,9 +211,9 @@ class Server:
     def add_to_total_bounces(self):
         self.total_bounces += 1
 
-    def add_score(self, points: int = 1):
+    def add_score(self, side_bounced, points: int = 1):
         """Update the score."""
-        if self.last_client_bounced is not None:
+        if self.last_client_bounced is not None and not self.last_client_bounced == side_bounced:
             self.last_client_bounced.score += points
 
     async def game_update(self):

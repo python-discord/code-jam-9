@@ -167,7 +167,10 @@ class Powerup:
 
     def end(self):
         pass
-
+    
+    @staticmethod
+    def to_string():
+        return 'powerup'
 
 class PaddleDisappearPowerup(Powerup):
 
@@ -182,7 +185,10 @@ class PaddleDisappearPowerup(Powerup):
     def end(self):
         if not len([powerup for powerup in client.powerups if type(powerup) == PaddleDisappearPowerup]) > 1:
             Paddle.color = arcade.color.WHITE
-
+    
+    @staticmethod
+    def to_string():
+        return 'paddle disappear powerup'
 
 class BallDisappearPowerup(Powerup):
 
@@ -198,6 +204,9 @@ class BallDisappearPowerup(Powerup):
         if not len([powerup for powerup in client.powerups if type(powerup) == BallDisappearPowerup]) > 1:
             Ball.color = arcade.color.WHITE
 
+    @staticmethod
+    def to_string():
+        return 'ball disapper powerup'
 
 class InversePowerup(Powerup):
 
@@ -210,6 +219,8 @@ class InversePowerup(Powerup):
         if not len([powerup for powerup in client.powerups if type(powerup) == InversePowerup]) > 1:
             Paddle.inverse = False
 
+    def to_string():
+        return 'inverse paddle movement powerup'
 
 class GameView(arcade.View):
     """The game view."""
@@ -219,6 +230,7 @@ class GameView(arcade.View):
         self.client = client
         self.shader = ChromaticAberration(SCREEN_WIDTH, SCREEN_HEIGHT)
         self.timer = 0
+        self.powerup_message_timer = -1
 
     def on_show_view(self):
         self.client.set_mouse_visible(False)
@@ -230,6 +242,13 @@ class GameView(arcade.View):
         if (random.randint(1, 30) > 2):
             self.timer += delta_time
             self.shader.program["time"] = self.timer
+        if self.client.powerup_message_data is not None:
+            if self.powerup_message_timer == -1:
+                self.powerup_message_timer = 3 * 60
+            self.powerup_message_timer -= 1
+            if self.powerup_message_timer == 0:
+                self.powerup_message_timer = -1
+                self.client.powerup_message_data = None
         if not self.client.updates:
             return
         if self.client.stop_event.is_set():
@@ -265,6 +284,14 @@ class GameView(arcade.View):
             arcade.csscolor.WHITE,
             18,
         )
+        if self.client.powerup_message_data is not None:
+            arcade.draw_text(
+                f'{"You " if self.client.powerup_message_data[0] == self.client.player_number else f"Player {self.client.powerup_message_data[0]}"} used a {globals()[self.client.powerup_message_data[1]].to_string()}',
+                100,
+                600,
+                (*arcade.color.WHITE, 255 * int((3 * 60)/self.powerup_message_timer)),
+                18,
+            )
         self.window.use()
         self.shader.draw()
 
@@ -291,7 +318,7 @@ class MainMenuView(arcade.View):
         v_box.add(ip_title)
 
         ip_input = arcade.gui.UIInputText(
-            text="zesty-zombies.pshome.me",
+            text="0.0.0.0",
             width=200,
             text_color=arcade.color.WHITE
         )
@@ -385,6 +412,7 @@ class Client(arcade.Window):
         self.bricks: list[Brick] = []
         self.scores_text = 'Get ready!'
         self.powerups: list[Powerup] = []
+        self.powerup_message_data = None
 
         self.start_event = threading.Event()
         self.stop_event = threading.Event()
@@ -467,6 +495,8 @@ class Client(arcade.Window):
                         self.paddles[message['data']['new']] = Paddle(number=message['data']['new'], local=False)
                     elif message['type'] == 'leave':
                         del self.paddles[message['data']]
+                    elif message['type'] == 'new_powerup':
+                        self.powerup_message_data = (message['data']['user'], message['data']['type'])
                     elif message['type'] == 'updates':
                         updates = message['data']
                         # Convert keys back to ints because yes
