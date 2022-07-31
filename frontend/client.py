@@ -33,7 +33,6 @@ class ChromaticAberration(RenderTargetTexture):
                 }
                 """,
                 fragment_shader=file.read()
-
             )
         self.program["resolution"] = (width, height)
 
@@ -94,15 +93,15 @@ class Paddle(arcade.Sprite):
             mouse_pos = position[self.direction]
             if self.direction == 0:
                 if self.inverse:
-                    self.center_x = abs(SCREEN_WIDTH - self.clamp(
-                        mouse_pos, self.width / 2, SCREEN_WIDTH - self.width / 2))
+                    self.center_x = abs(SCREEN_WIDTH - self.clamp(mouse_pos, self.width / 2,
+                                        SCREEN_WIDTH - self.width / 2))
                 else:
                     self.center_x = self.clamp(
                         mouse_pos, self.width / 2, SCREEN_WIDTH - self.width / 2)
             else:
                 if self.inverse:
-                    self.center_y = abs(SCREEN_HEIGHT - self.clamp(
-                        mouse_pos, self.height / 2, SCREEN_HEIGHT - self.height / 2))
+                    self.center_y = abs(SCREEN_HEIGHT - self.clamp(mouse_pos, self.height / 2,
+                                        SCREEN_HEIGHT - self.height / 2))
                 else:
                     self.center_y = self.clamp(
                         mouse_pos, self.height / 2, SCREEN_HEIGHT - self.height / 2)
@@ -115,7 +114,7 @@ class Paddle(arcade.Sprite):
 
 class Ball(arcade.Sprite):
     """The ball sprite."""
-
+    
     def __init__(self):
         """Initialize a ball sprite.
 
@@ -173,7 +172,7 @@ class Powerup:
         pass
 
 
-class DisappearPowerup(Powerup):
+class PaddleDisappearPowerup(Powerup):
 
     def __init__(self, client) -> None:
         self.timer = 0
@@ -182,11 +181,25 @@ class DisappearPowerup(Powerup):
     def update(self):
         self.timer += 0.01
         Paddle.color = (*arcade.color.WHITE, (abs(math.sin(self.timer))) * 255 * 0.05)
-        print(abs(math.sin(self.timer)))
 
     def end(self):
-        if not len([powerup for powerup in client.powerups if type(powerup) == DisappearPowerup]) > 1:
+        if not len([powerup for powerup in client.powerups if type(powerup) == PaddleDisappearPowerup]) > 1:
             Paddle.color = arcade.color.WHITE
+
+
+class BallDisappearPowerup(Powerup):
+
+    def __init__(self, client) -> None:
+        self.timer = 0
+        self.client = client
+
+    def update(self):
+        self.timer += 0.01
+        Ball.color = (*arcade.color.WHITE, (abs(math.sin(self.timer))) * 255 * 0.05)
+
+    def end(self):
+        if not len([powerup for powerup in client.powerups if type(powerup) == BallDisappearPowerup]) > 1:
+            Ball.color = arcade.color.WHITE
 
 
 class InversePowerup(Powerup):
@@ -281,7 +294,7 @@ class MainMenuView(arcade.View):
         v_box.add(ip_title)
 
         ip_input = arcade.gui.UIInputText(
-            text="0.0.0.0",
+            text="zesty-zombies.pshome.me",
             width=200,
             text_color=arcade.color.WHITE
         )
