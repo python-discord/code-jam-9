@@ -89,7 +89,7 @@ function connectToServer() {
     }
 
     else if (message.event == "question"){
-        document.getElementById('question-field').innerHTML = message.question;
+        document.getElementById('question-area').innerHTML = message.question;
         document.getElementById('traceback').innerHTML = message.traceback;
         document.getElementById('code-area').innerHTML = message.code;
 
