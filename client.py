@@ -106,7 +106,7 @@ class Paddle(arcade.Sprite):
 
 class Ball(arcade.Sprite):
     """The ball sprite."""
-    
+
     def __init__(self):
         """Initialize a ball sprite.
 
@@ -162,10 +162,11 @@ class Powerup:
 
     def end(self):
         pass
-    
+
     @staticmethod
     def to_string():
         return 'powerup'
+
 
 class PaddleDisappearPowerup(Powerup):
 
@@ -180,10 +181,11 @@ class PaddleDisappearPowerup(Powerup):
     def end(self):
         if not len([powerup for powerup in client.powerups if type(powerup) == PaddleDisappearPowerup]) > 1:
             Paddle.color = arcade.color.WHITE
-    
+
     @staticmethod
     def to_string():
         return 'paddle disappear powerup'
+
 
 class BallDisappearPowerup(Powerup):
 
@@ -203,6 +205,7 @@ class BallDisappearPowerup(Powerup):
     def to_string():
         return 'ball disapper powerup'
 
+
 class InversePowerup(Powerup):
 
     def __init__(self, client) -> None:
@@ -216,6 +219,7 @@ class InversePowerup(Powerup):
 
     def to_string():
         return 'inverse paddle movement powerup'
+
 
 class GameView(arcade.View):
     """The game view."""
@@ -281,7 +285,7 @@ class GameView(arcade.View):
         )
         if self.client.powerup_message_data is not None:
             arcade.draw_text(
-                f'{"You " if self.client.powerup_message_data[0] == self.client.player_number else f"Player {self.client.powerup_message_data[0]}"} used a {globals()[self.client.powerup_message_data[1]].to_string()}',
+                f'{"You " if self.client.powerup_message_data[0] == self.client.player_number else f"Player {self.client.powerup_message_data[0]}"} used a {globals()[self.client.powerup_message_data[1]].to_string()}',  # noqa: E501
                 100,
                 600,
                 (*arcade.color.WHITE, 255 * int((3 * 60)/self.powerup_message_timer)),

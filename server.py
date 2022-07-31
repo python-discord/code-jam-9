@@ -5,6 +5,7 @@ import json
 import random
 
 import websockets
+
 from ball import Ball
 
 PATTERNS = {'plus_pattern': [[.25, .5, 50, 10, 1], [.35, .5, 50, 10, 1], [.65, .5, 50, 10, 1], [.75, .5, 50, 10, 1],
@@ -194,8 +195,6 @@ class Server:
                 elif event['type'] == 'paddle':
                     # Paddle position update
                     player.paddle_position = event['data']
-        except Exception as e:
-            pass
         finally:
             # Clean up the connection
             await websocket.close()
