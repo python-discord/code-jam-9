@@ -126,7 +126,8 @@ async def main() -> None:
     """Runs the websockets server."""
     async with websockets.serve(connect, "localhost", 8081):
         while True:
-            await send_event()
+            while CONNECTIONS.user_limit is None or len(CONNECTIONS) < CONNECTIONS.user_limit:
+                await send_event()
             # Dict to track player scores
             scores = {uname: 0 for uname in CONNECTIONS.data.keys()}
             conns = CONNECTIONS.data.values()
