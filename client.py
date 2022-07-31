@@ -111,10 +111,9 @@ class Ball(arcade.Sprite):
             height (int, optional): The height of the ball sprite. Defaults to 10.
         """
         super().__init__()
-        self.textures: list[arcade.Texture] = []
-        self.textures.append(arcade.load_texture(os.path.join(ASSETS_DIR, 'images', 'bug.png')))
-        self.textures.append(arcade.load_texture(os.path.join(ASSETS_DIR, 'images', 'dvd.png')))
-        self.alpha = 255
+        self.color = arcade.color.WHITE
+        self.bug = arcade.load_texture(os.path.dirname(os.path.dirname(os.path.realpath(__file__))) + '/images/bug.png')
+        self.dvd = arcade.load_texture(os.path.dirname(os.path.dirname(os.path.realpath(__file__))) + '/images/dvd.png')
         self.ball_texture = 0
 
     def update(self, position: tuple[int, int]):
