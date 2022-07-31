@@ -3,6 +3,7 @@ import random
 
 class Ball:
     def __init__(self, screen_size, server):
+        self.texture = 0
         self.server = server
         self.ball_size = (10, 10)
         self.paddle_size = (10, 100)
@@ -113,6 +114,7 @@ class Ball:
                 or self.ball_position[0] > 750 or self.ball_position[1] > 750):
             self.debug(collided_side)
             self.reset_ball()
+            self.texture = 1
 
     def debug(self, collided_side):
         print(self.ball_last_side_bounced_off_of)
@@ -150,6 +152,7 @@ class Ball:
         self.total_bounces = 0
         self.server.bricks.empty_bricks()
         self.server.last_client_bounced = None
+        self.texture = 0
 
     def check_ball_paddle_collision(self, object_pos, object_size, player_number=0):
         """Check if the ball is colliding with a paddle."""
