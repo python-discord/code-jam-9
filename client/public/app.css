@@ -4,6 +4,7 @@
 }
 
 .App-container {
+  font-family: "Courier New", Courier, monospace;
   display: flex;
   flex-flow: row wrap;
   margin: 3vh;
@@ -17,6 +18,8 @@
   border: none;
   resize: none;
   font-size: 14px;
+  border: 2px solid gray;
+  border-radius: 5px;
 }
 
 .Debug-area {
@@ -27,6 +30,8 @@
   border: none;
   resize: none;
   font-size: 14px;
+  border: 2px solid gray;
+  border-radius: 5px;
 }
 
 .Question-area {
@@ -38,6 +43,27 @@
   resize: none;
   font-size: 14px;
   padding: 1vh;
+  border: 2px solid gray;
+  border-radius: 5px;
+}
+
+.Answer-tile {
+  background-color: rgb(30, 30, 30);
+  justify-content: center;
+  align-items: center;
+  color: white;
+  width: 80%;
+  height: 6vh;
+  border: none;
+  resize: none;
+  font-size: 14px;
+  margin-top: 2vh;
+  border: 2px solid gray;
+  border-radius: 5px;
+}
+
+.Answer-tile:hover {
+  background-color: gray;
 }
 
 .Setup-menu {
@@ -51,6 +77,8 @@
   height: 60vh;
   margin-left: auto;
   text-align: left;
+  border: 2px solid gray;
+  border-radius: 5px;
 }
 
 .Player-list {
