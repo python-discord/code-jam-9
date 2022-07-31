@@ -126,6 +126,8 @@ class Ball(arcade.Sprite):
         super().__init__()
         self.color = arcade.color.WHITE
         self.bug = arcade.load_texture('images/bug.png')
+        self.dvd = arcade.load_texture('images/dvd.png')
+        self.ball_texture = 0
 
     def update(self, position: tuple[int, int]):
         """Update the ball location.
@@ -136,7 +138,10 @@ class Ball(arcade.Sprite):
         self.center_x, self.center_y = position
 
     def draw(self):
-        self.bug.draw_scaled(self.center_x, self.center_y, scale=2)
+        if self.ball_texture == 0:
+            self.bug.draw_scaled(self.center_x, self.center_y, scale=2)
+        else:
+            self.dvd.draw_scaled(self.center_x, self.center_y)
 
 
 class Brick(arcade.Sprite):
@@ -457,6 +462,7 @@ class Client(arcade.Window):
                         # Convert keys back to ints because yes
                         updates['players'] = {int(k): v for k, v in updates['players'].items()}
                         self.updates = updates
+                        print(self.updates)
                         self.scores_text = self.get_score_text()
                         if not len(updates['bricks']) == len(self.bricks):
                             self.bricks = []
