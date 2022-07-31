@@ -196,7 +196,7 @@ class InvisibleBallPowerup(Powerup):
         return 'an invisible ball powerup'
 
 
-class InversePowerup(Powerup):
+class InvertedPaddlePowerup(Powerup):
     def __init__(self, client):
         self.timer = 0
         self.client = client
