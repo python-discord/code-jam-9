@@ -22,10 +22,7 @@ class ChromaticAberration(RenderTargetTexture):
             fragment_shader = file.read()
         with open(os.path.join(ASSETS_DIR, 'shaders', 'vertex.glsl')) as file:
             vertex_shader = file.read()
-        self.program = self.ctx.program(
-            fragment_shader=fragment_shader,
-            vertex_shader=vertex_shader,
-        )
+        self.program = self.ctx.program(fragment_shader=fragment_shader, vertex_shader=vertex_shader)
         self.program["resolution"] = (width, height)
 
     def use(self):
@@ -38,9 +35,6 @@ class ChromaticAberration(RenderTargetTexture):
 
 class Paddle(arcade.Sprite):
     """The paddle sprite."""
-
-    color = arcade.color.WHITE
-    inverse = False
 
     def __init__(self, width: int = 10, height: int = 100, number: int = 0, direction: int = 1, local: bool = True):
         """Initialize a paddle sprite.
@@ -70,6 +64,8 @@ class Paddle(arcade.Sprite):
             self.center_y = 30
         elif self.number == 3:
             self.center_y = SCREEN_HEIGHT - 30
+        self.color = arcade.color.WHITE
+        self.inverted = False
 
     def clamp(self, value: float, min_value: float, max_value: float) -> float:
         """Restrict the provided value to be between a minimum and maximum."""
@@ -84,19 +80,19 @@ class Paddle(arcade.Sprite):
         if self.local:
             mouse_pos = position[self.direction]
             if self.direction == 0:
-                if self.inverse:
-                    self.center_x = abs(SCREEN_WIDTH - self.clamp(mouse_pos, self.width / 2,
-                                        SCREEN_WIDTH - self.width / 2))
+                if self.inverted:
+                    self.center_x = abs(
+                        SCREEN_WIDTH - self.clamp(mouse_pos, self.width / 2, SCREEN_WIDTH - self.width / 2)
+                    )
                 else:
-                    self.center_x = self.clamp(
-                        mouse_pos, self.width / 2, SCREEN_WIDTH - self.width / 2)
+                    self.center_x = self.clamp(mouse_pos, self.width / 2, SCREEN_WIDTH - self.width / 2)
             else:
-                if self.inverse:
-                    self.center_y = abs(SCREEN_HEIGHT - self.clamp(mouse_pos, self.height / 2,
-                                        SCREEN_HEIGHT - self.height / 2))
+                if self.inverted:
+                    self.center_y = abs(
+                        SCREEN_HEIGHT - self.clamp(mouse_pos, self.height / 2, SCREEN_HEIGHT - self.height / 2)
+                    )
                 else:
-                    self.center_y = self.clamp(
-                        mouse_pos, self.height / 2, SCREEN_HEIGHT - self.height / 2)
+                    self.center_y = self.clamp(mouse_pos, self.height / 2, SCREEN_HEIGHT - self.height / 2)
         else:
             self.center_x, self.center_y = position
 
@@ -115,9 +111,10 @@ class Ball(arcade.Sprite):
             height (int, optional): The height of the ball sprite. Defaults to 10.
         """
         super().__init__()
-        self.color = arcade.color.WHITE
-        self.bug = arcade.load_texture(os.path.join(ASSETS_DIR, 'images', 'bug.png'))
-        self.dvd = arcade.load_texture(os.path.join(ASSETS_DIR, 'images', 'dvd.png'))
+        self.textures: list[arcade.Texture] = []
+        self.textures.append(arcade.load_texture(os.path.join(ASSETS_DIR, 'images', 'bug.png')))
+        self.textures.append(arcade.load_texture(os.path.join(ASSETS_DIR, 'images', 'dvd.png')))
+        self.alpha = 255
         self.ball_texture = 0
 
     def update(self, position: tuple[int, int]):
@@ -129,14 +126,10 @@ class Ball(arcade.Sprite):
         self.center_x, self.center_y = position
 
     def draw(self):
-        if self.ball_texture == 0:
-            self.bug.draw_scaled(self.center_x, self.center_y, scale=2)
-        else:
-            self.dvd.draw_scaled(self.center_x, self.center_y, scale=2)
+        self.textures[self.ball_texture].draw_scaled(self.center_x, self.center_y, scale=1.75, alpha=self.alpha)
 
 
 class Brick(arcade.Sprite):
-
     def __init__(self, width: int = 10, height: int = 10):
         """The Brick sprite."""
 
@@ -153,7 +146,6 @@ class Brick(arcade.Sprite):
 
 
 class Powerup:
-
     def __init__(self, client):
         pass
 
@@ -165,60 +157,59 @@ class Powerup:
 
     @staticmethod
     def to_string():
-        return 'powerup'
+        return 'a powerup'
 
 
-class PaddleDisappearPowerup(Powerup):
-
-    def __init__(self, client) -> None:
+class InvisiblePaddlePowerup(Powerup):
+    def __init__(self, client):
         self.timer = 0
         self.client = client
 
     def update(self):
         self.timer += 0.01
-        Paddle.color = (*arcade.color.WHITE, (abs(math.sin(self.timer))) * 255 * 0.05)
+        self.client.local_paddle.color = (*arcade.color.WHITE, int((abs(math.sin(self.timer))) * 255 * 0.05))
+        print(self.client.local_paddle.color)
 
     def end(self):
-        if not len([powerup for powerup in client.powerups if type(powerup) == PaddleDisappearPowerup]) > 1:
-            Paddle.color = arcade.color.WHITE
+        if len([powerup for powerup in client.powerups if isinstance(powerup, InvisiblePaddlePowerup)]) <= 1:
+            self.client.local_paddle.color = arcade.color.WHITE
 
     @staticmethod
     def to_string():
-        return 'paddle disappear powerup'
+        return 'an invisible paddle powerup'
 
 
-class BallDisappearPowerup(Powerup):
-
-    def __init__(self, client) -> None:
+class InvisibleBallPowerup(Powerup):
+    def __init__(self, client):
         self.timer = 0
         self.client = client
 
     def update(self):
         self.timer += 0.01
-        Ball.color = (*arcade.color.WHITE, (abs(math.sin(self.timer))) * 255 * 0.05)
+        self.client.ball.alpha = int((abs(math.sin(self.timer))) * 255 * 0.05)
 
     def end(self):
-        if not len([powerup for powerup in client.powerups if type(powerup) == BallDisappearPowerup]) > 1:
-            Ball.color = arcade.color.WHITE
+        if len([powerup for powerup in client.powerups if isinstance(powerup, InvisibleBallPowerup)]) <= 1:
+            self.client.ball.alpha = 255
 
     @staticmethod
     def to_string():
-        return 'ball disapper powerup'
+        return 'an invisible ball powerup'
 
 
-class InversePowerup(Powerup):
-
-    def __init__(self, client) -> None:
+class InvertedPaddlePowerup(Powerup):
+    def __init__(self, client):
         self.timer = 0
         self.client = client
-        Paddle.inverse = True
+        self.client.local_paddle.inverted = True
 
     def end(self):
-        if not len([powerup for powerup in client.powerups if type(powerup) == InversePowerup]) > 1:
-            Paddle.inverse = False
+        if len([powerup for powerup in client.powerups if isinstance(powerup, InvertedPaddlePowerup)]) <= 1:
+            self.client.local_paddle.inverted = False
 
+    @staticmethod
     def to_string():
-        return 'inverse paddle movement powerup'
+        return 'an inverted paddle movement powerup'
 
 
 class GameView(arcade.View):
@@ -238,7 +229,7 @@ class GameView(arcade.View):
         self.client.set_mouse_visible(True)
 
     def on_update(self, delta_time: float):
-        if (random.randint(1, 30) > 2):
+        if random.randint(1, 30) > 2:
             self.timer += delta_time
             self.shader.program["time"] = self.timer
         if self.client.powerup_message_data is not None:
@@ -259,7 +250,10 @@ class GameView(arcade.View):
             except KeyError:  # When updates variable hasn't been updated yet
                 pass
         for index, brick in enumerate(self.client.bricks):
-            brick.update(position=self.client.updates['bricks'][index]["position"])
+            try:
+                brick.update(position=self.client.updates['bricks'][index]["position"])
+            except IndexError:  # Wouldn't be coding without a few hacks ¯\_(ツ)_/¯
+                pass
         for powerup in self.client.powerups:
             powerup.update()
         self.shader.program["glitch"] = len(self.client.powerups) > 0
@@ -280,15 +274,20 @@ class GameView(arcade.View):
             self.client.scores_text,
             10,
             10,
-            arcade.csscolor.WHITE,
+            arcade.color.WHITE,
             18,
         )
         if self.client.powerup_message_data is not None:
+            if self.client.powerup_message_data[0] == self.client.player_number:
+                player = "You"
+            else:
+                player = f"Player {self.client.powerup_message_data[0] + 1}"
             arcade.draw_text(
-                f'{"You" if self.client.powerup_message_data[0] == self.client.player_number else f"Player {self.client.powerup_message_data[0]}"} used a {globals()[self.client.powerup_message_data[1]].to_string()}',  # noqa: E501
+                # I didn't write this globals() stuff but if it works I'd better not touch it  -- LemonPi314
+                f"{player} used {globals()[self.client.powerup_message_data[1]].to_string()}",
                 100,
                 600,
-                (*arcade.color.WHITE, 255 * int((3 * 60)/self.powerup_message_timer)),
+                (*arcade.color.WHITE, 255 * int((3 * 60) / self.powerup_message_timer)),
                 18,
             )
         self.window.use()
@@ -316,11 +315,7 @@ class MainMenuView(arcade.View):
         ip_title = arcade.gui.UILabel(text="SERVER IP:", font_size=20, font_color=arcade.color.WHITE)
         v_box.add(ip_title)
 
-        ip_input = arcade.gui.UIInputText(
-            text="0.0.0.0",
-            width=200,
-            text_color=arcade.color.WHITE
-        )
+        ip_input = arcade.gui.UIInputText(text='localhost', width=200, text_color=arcade.color.WHITE)
         v_box.add(ip_input)
 
         connect_button = arcade.gui.UIFlatButton(text="CONNECT", width=200)
@@ -332,20 +327,11 @@ class MainMenuView(arcade.View):
         v_box.add(exit_button.with_space_around(bottom=20))
 
         self.menu_message = arcade.gui.UILabel(
-            text='',
-            width=400,
-            height=20,
-            align='center',
-            text_color=arcade.color.WHITE
+            text='', width=400, height=20, align='center', text_color=arcade.color.WHITE
         )
         v_box.add(self.menu_message)
 
-        self.manager.add(
-            arcade.gui.UIAnchorWidget(
-                anchor_x="center_x",
-                anchor_y="center_y",
-                child=v_box)
-        )
+        self.manager.add(arcade.gui.UIAnchorWidget(anchor_x="center_x", anchor_y="center_y", child=v_box))
 
     def on_show_view(self):
         self.manager.enable()
@@ -380,12 +366,7 @@ class PauseMenuView(arcade.View):
         exit_button.on_click = lambda event: self.client.exit()
         v_box.add(exit_button.with_space_around(bottom=20))
 
-        self.manager.add(
-            arcade.gui.UIAnchorWidget(
-                anchor_x="center_x",
-                anchor_y="center_y",
-                child=v_box)
-        )
+        self.manager.add(arcade.gui.UIAnchorWidget(anchor_x="center_x", anchor_y="center_y", child=v_box))
 
     def on_show_view(self):
         self.manager.enable()
@@ -409,10 +390,11 @@ class Client(arcade.Window):
         self.local_paddle: Paddle = None  # type: ignore
         self.ball: Ball = None  # type: ignore
         self.bricks: list[Brick] = []
-        self.scores_text = 'Get ready!'
+        self.scores_text = "Get ready!"
         self.powerups: list[Powerup] = []
         self.powerup_message_data = None
 
+        self.network_thread = None
         self.start_event = threading.Event()
         self.stop_event = threading.Event()
         self.network_stop_event = threading.Event()
@@ -433,7 +415,6 @@ class Client(arcade.Window):
     def exit(self):
         self.disconnect()
         arcade.exit()
-        raise SystemExit
 
     def cleanup(self):
         self.paddles = {}
@@ -442,6 +423,8 @@ class Client(arcade.Window):
 
     def disconnect(self):
         self.network_stop_event.set()
+        if self.network_thread:
+            self.network_thread.join()
         self.cleanup()
 
     def connect(self, ip: str):
@@ -456,15 +439,16 @@ class Client(arcade.Window):
         else:
             self.main_menu_view.menu_message.text = "FAILED TO CONNECT TO SERVER"
 
-    def get_score_text(self):
+    def get_score_text(self) -> str:
         text = ''
         for key in self.updates['players']:
             if self.updates['players'][key]['player_number'] == self.player_number:
-                text += "You: {} ".format(self.updates['players'][key]['score'])
+                text += f"You: {self.updates['players'][key]['score']} "
             else:
-                text += 'Player {}: {} '.format(
-                    self.updates['players'][key]['player_number']+1,
-                    self.updates['players'][key]['score'])
+                text += (
+                    f"Player {self.updates['players'][key]['player_number'] + 1}: "
+                    f"{self.updates['players'][key]['score']} "
+                )
         return text
 
     async def network_loop(self, ip: str):
@@ -486,7 +470,7 @@ class Client(arcade.Window):
                         'data': (
                             self.local_paddle.center_x,
                             self.local_paddle.center_y,
-                        )
+                        ),
                     }
                     await websocket.send(json.dumps(data))
                     message = json.loads(await websocket.recv())
