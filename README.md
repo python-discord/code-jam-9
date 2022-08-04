@@ -43,7 +43,7 @@ Activate the virtual environment.
 ```bash
 # PowerShell
 .venv/Scripts/activate
-# CMD
+# Command Prompt
 .venv\Scripts\activate
 # Bash or other Linux shell
 source .venv/bin/activate
@@ -66,6 +66,10 @@ Enter the IP address of a server to connect to.
 ![image](https://user-images.githubusercontent.com/49930425/182553749-e0cee289-c3f6-4559-9dfa-f0474b62463a.png)
 
 Click the Connect button to join the server and start playing. Multiple clients can be run on the same machine.
+
+Note: The text field does not show a cursor or highlight text, but you are still able to type in it.
+
+A public server will be available during the Code Jam for judging and demonstration purposes at the IP address `zesty-zombies.pshome.me`.
 
 ### Gameplay
 
