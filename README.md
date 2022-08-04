@@ -13,6 +13,7 @@ This repository contains the **Zesty Zombies** team's submission for the [9th Py
     - [Launching the Client](#launching-the-client)
     - [Gameplay](#gameplay)
     - [Hosting a Server](#hosting-a-server)
+    - [Docker](#docker)
     - [Extras](#extras)
   - [How It Works](#how-it-works)
     - [Communication](#communication)
@@ -93,6 +94,24 @@ python server.py
 This will start a server on the IP address `0.0.0.0` and port `8765`.
 
 If you want the server to be accessible from the Internet, you need to port-forward port `8765`. This process is similar to hosting a Minecraft server locally. Otherwise the server will be available on the local network only.
+
+### Docker
+
+The repository contains a Dockerfile if you wish to run the server in a container.
+
+Build the container image.
+
+```bash
+docker build -t zesty_zombies .
+```
+
+Run the container.
+
+```bash
+docker run -d -p 8765:8765 --name="zesty_zombies" zesty-zombies
+```
+
+This will expose port 8765 to be connected to, additional firewall configuration and port-forwarding may be required.
 
 ### Extras
 
@@ -190,15 +209,6 @@ The server also broadcasts events.
 ### User Interface
 
 The client uses the [`arcade`](https://pypi.org/project/arcade/) library to show the game state on screen and get the mouse cursor position.
-
-##Docker
-The repo contains a docker file if you wish to run the server in a container
-1. Clone the repo from Github,
-2. Build the container image:  `docker build -t zesty_zombies .`
-3. Run the container `docker run -d -p 8765:8765 --name="zesty_zombies" zesty-zombies`  
-
-This will expose port 8765 to be connected to, additional firewall and port forwarding may be required.
-
 
 ## Improvements
 
