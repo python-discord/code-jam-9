@@ -4,6 +4,8 @@ A Pong/Breakout hybrid with some odd features and twists.
 
 This repository contains the **Zesty Zombies** team's submission for the [9th Python Discord Code Jam](https://www.pythondiscord.com/events/code-jams/9/).
 
+The planning document is available [here](https://docs.google.com/document/d/1tSLVY6UtiPd9_nb_SqX0iz_ja2lJUBb2YvVplKj6tY8/edit?usp=sharing).
+
 ## Table of Contents
 
 - [Pongout](#pongout)
