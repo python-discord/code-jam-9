@@ -191,6 +191,15 @@ The server also broadcasts events.
 
 The client uses the [`arcade`](https://pypi.org/project/arcade/) library to show the game state on screen and get the mouse cursor position.
 
+##Docker
+The repo contains a docker file if you wish to run the server in a container
+1. Clone the repo from Github,
+2. Build the container image:  `docker build -t zesty_zombies .`
+3. Run the container `docker run -d -p 8765:8765 --name="zesty_zombies" zesty-zombies`  
+
+This will expose port 8765 to be connected to, additional firewall and port forwarding may be required.
+
+
 ## Improvements
 
 The Code Jam submission deadline has passed, however the game can still be improved outside of the Code Jam. These are some improvements that could be made:
