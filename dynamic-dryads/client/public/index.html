@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>SpeeDebug</title>
+    <meta name="description" content="Code-Jam-9 Submission" />
+    <link rel="stylesheet" href="app.css">
+  </head>
+
+  <body class="App">
+    <div class="App-container">
+      <div class="Code-container">
+        <textarea class="Code-area" id="code-area" wrap="off" disabled="true">Code to Debug</textarea><br>
+        <textarea class="Debug-area" id="traceback" disabled="true">Traceback</textarea><br>
+      </div>
+      <div class="Setup-menu">
+        <textarea class="Question-area" id="question-area" disabled="true">Question</textarea><br>
+        <button class="Answer-tile" id="0" disabled="true" onclick="processAnswer(0)">Answer 1</button><br>
+        <button class="Answer-tile" id="1" disabled="true" onclick="processAnswer(1)">Answer 2</button><br>
+        <button class="Answer-tile" id="2" disabled="true" onclick="processAnswer(2)">Answer 3</button><br>
+        <button class="Answer-tile" id="3" disabled="true" onclick="processAnswer(3)">Answer 4</button><br>
+      </div>
+      <div class="Player-data">
+        <h1>SpeeDebug</h1>
+        <label for="input" id="input-label">Server Address:</label><br>
+        <input class="Input-field" type="text" id="input" name="input" value="localhost:8081"><br>
+        <button class="Input-field" id="input-button" onclick={handleSetup()}>Submit</button><br>
+        <br>
+        <span class="Error" id="error-field"></span>
+        <br><br>
+        Player Count: <span id="player-count">Waiting...<br></span><br>
+        Online Players:<br>
+        <ul class="Player-list" id="player-list"></ul>
+        <br>
+        <button class="Input-field" id="start-button" disabled="true" onclick={sendStartRequest()}>Start Game</button><br>
+      </div>
+    </div>
+  </body>
+
+</html>
+
+<script src="client.js"></script>

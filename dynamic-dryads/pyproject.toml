@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "Code Jam 9"
+version = "0.1.0"
+description = "Our submission for Code Jam 9."
+authors = ["Dynamic Dryads"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "3.10.*"
+websockets = "^10.3"
+
+[tool.poetry.dev-dependencies]
+taskipy = "^1.10.2"
+black = "^22.6.0"
+flake8 = "~4.0.1"
+isort = "~5.10.1"
+pre-commit = "~2.17.0"
+flake8-docstrings = "~1.6.0"
+
+[tool.taskipy.tasks]
+format = "black ."
+sort = "isort ."
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
