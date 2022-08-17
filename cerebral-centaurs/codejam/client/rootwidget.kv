@@ -1,0 +1,91 @@
+#:import pd codejam.server.models.phrase_generator.PhraseDifficulty
+#:import ascii string.ascii_lowercase
+#:import digits string.digits
+
+<Lobby@RelativeLayout>
+
+<MenuScreen@Screen>
+
+<GameButton@Button>:
+    size_hint: 0.4, 0.4
+    background_color: 0, 0, 0, 1
+    font_size: sp(30)
+
+<LobbyButton@Button>:
+    text: "Start game"
+    pos_hint: {"x": 0.3, "y": 0.4}
+    size_hint: 0.4, 0.2
+
+<LoginInput@TextInput>:
+    background_color: 0.2, 0.2, 0.2, 1
+    font_size: self.height * 0.6
+    multiline: False
+    input_filter: lambda text, _: ''.join([x for x in text if x.lower() in ascii + digits])
+
+RootWidget:
+    ws: False
+    MenuScreen:
+        id: menu_screen
+        name: 'menu_screen'
+        RelativeLayout:
+            BoxLayout:
+                pos_hint: {"center_x": .5, "center_y": .7}
+                size_hint: .45, .27
+                orientation: 'vertical'
+                LoginInput:
+                    id: username
+                    hint_text: 'Username'
+                LoginInput:
+                    id: game_selection
+                    hint_text: 'Entry code'
+                Spinner:
+                    id: difficulty
+                    values: pd.list()
+                    text: pd.default()
+        GameButton:
+            canvas.before:
+                Color:
+                    rgba: .2, .5, .9, 1
+                Line:
+                    width: 5
+                    rectangle: self.x, self.y, self.width, self.height
+            color: 0.2, 0.5, 0.9, 1
+            pos: root.width * 0.55, root.height * 0.05
+            text: "Join room"
+            on_release:
+                root.create_room = False
+                root.username = username.text or root.username
+                root.game_id = game_selection.text
+                root.current = 'whiteboard'
+        GameButton:
+            canvas.before:
+                Color:
+                    rgba: .5, .2, .9, 1
+                Line:
+                    width: 5
+                    rectangle: self.x, self.y, self.width, self.height
+            color: 0.5, 0.2, 0.9, 1
+            pos: root.width * 0.05, root.height * 0.05
+            text: "Create room"
+            on_release:
+                root.create_room = True
+                root.difficulty = difficulty.text
+                root.username = username.text or root.username
+                root.current = 'whiteboard'
+    WhiteBoardScreen:
+        id: wbs
+        name: 'whiteboard'
+        Lobby:
+            id: lobby
+            LobbyButton:
+                canvas.before:
+                    Color:
+                        rgba: .2, .5, .9, 1
+                    Line:
+                        width: 5
+                        rectangle: self.x, self.y, self.width, self.height
+                color: 0.2, 0.5, 0.9, 1
+                background_color: 0, 0, 0, 1
+                font_size: sp(30)
+                on_release:
+                    wbs.start_game()
