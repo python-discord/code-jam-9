@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "common"
+version = "0.1.0"
+description = ""
+authors = ["A5rocks <git@helvetica.moe>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pydantic = "^1.9.1"
+
+[tool.poetry.dev-dependencies]
+# Base tools
+flake8 = "~4.0.1"
+isort = "~5.10.1"
+pre-commit = "~2.17.0"
+black = "^22.6.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
