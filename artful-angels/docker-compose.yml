@@ -1,0 +1,34 @@
+version: "3.9"
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: ./docker/vue/Dockerfile
+    container_name: frontend
+    ports:
+      - "8080:8080"
+
+  django:
+    build:
+      context: .
+      dockerfile: ./docker/django/Dockerfile
+    container_name: django_app
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/app
+    command: "python manage.py runserver 0.0.0.0:8000"
+    # command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+
+  # for channel layers
+  redis_layer:
+    image: redis
+    container_name: redis_layer
+    ports:
+      - "6379:6379"
+  # for cache storage
+  redis_cache:
+    image: redis
+    container_name: redis_cache
+    ports:
+      - "6380:6380"
