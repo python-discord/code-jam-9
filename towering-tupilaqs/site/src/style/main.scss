@@ -1,0 +1,85 @@
+@import "variables.scss";
+@import "box.scss";
+@import "content-base.scss";
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+
+}
+
+body {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100vh;
+      background-color: rgba(17, 24, 39, 1);
+      user-select: none;
+  .App{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    min-height: 100vh;
+    .debug-color{
+      color: red;
+    }
+    .errors{
+      display: flex;
+      justify-content: center;
+      p{
+        color: red;
+        font-weight: bold;
+        font-style: italic;
+      }
+    }
+    .main-title{
+      font-style: italic;
+      font-weight: bold;
+      color: white;
+      margin-top: 15px;
+      letter-spacing: 2px;
+      &.center{
+
+        margin-left: 300px;
+        margin-top: 50px;
+
+      }
+    }
+    .start-button{
+      position: absolute;
+      font-style: italic;
+      font-weight: bold;
+      left: 50%;
+
+    }
+    .desc{
+      text-align: center;
+      color: #8c03fc;
+    }
+    .flex{
+      display: flex;
+      margin-top: 10px;
+    }
+    .inputs{
+      display: flex;
+      margin-top: 40px;
+      gap: 15px;
+      align-content: center;
+      &.registration{
+        justify-content: center;
+        align-items: center;
+
+      }
+      .editor{
+        width: 100px;
+      }
+    }
+    .debug{
+     display: none;
+	color: #8c03fc;
+    }
+  }
+}

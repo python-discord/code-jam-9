@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "Towering tupilaqs"
+version = "0.1.0"
+description = "Quiz game to determine if a piece of code is a bug or a feature for Python Discord Code Jam 2022"
+authors = ["TheFactoryMustGrowLarger <https://github.com/TheFactoryMustGrowLarger>",
+	"Leonardo <https://github.com/Gioack>",
+	"Hadházy Tamás <https://github.com/Hels15>",
+	"Tobias Fredriksson <https://github.com/Nyxion>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "3.10.*"
+fastapi = "^0.79.0"
+uvicorn = "^0.18.2"
+websockets = "^10.3"
+psycopg = {extras = ["binary", "pool"], version = "^3.0.15"}
+
+[tool.poetry.dev-dependencies]
+# Base tools
+flake8 = "~4.0.1"
+isort = "~5.10.1"
+pre-commit = "~2.17.0"
+
+# Flake8 plugins, see https://github.com/python-discord/code-jam-template/tree/main#plugin-list
+flake8-docstrings = "~1.6.0"
+
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
